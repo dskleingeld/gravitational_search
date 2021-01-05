@@ -20,10 +20,11 @@ impl Stratagy for Minimize {
     }
 }
 
-struct GSA<E, S, const D: usize> 
+struct GSA<E, S, C, const D: usize> 
     where 
         E: Fn(&[f32]) -> f32,
         S: Stratagy,
+        C: Fn(&Self) -> bool,
 {
     rng: RandNumGen,
     agents: Vec<Agent<D>>,
@@ -35,14 +36,16 @@ struct GSA<E, S, const D: usize>
     n: usize,
     strat: PhantomData<S>,
     eval: E,
+    end_criterion: C,
 }
 
-impl<E, S, const D: usize> GSA<E,S,D> 
+impl<E, S, C, const D: usize> GSA<E,S,C,D> 
     where 
         E: Fn(&[f32]) -> f32,
         S: Stratagy,
+        C: Fn(&Self) -> bool,
 {
-    pub fn new(g0: f32, t0: f32, eval: E) -> GSA<E,S,D> {
+    pub fn new(g0: f32, t0: f32, eval: E, end_criterion: C) -> GSA<E,S,C,D> {
         GSA {
             rng: RandNumGen::seed_from_u64(0),
             agents: Vec::new(),
@@ -54,6 +57,7 @@ impl<E, S, const D: usize> GSA<E,S,D>
             n: 0,
             strat: PhantomData,
             eval,
+            end_criterion,
         }
     }
 
@@ -74,7 +78,7 @@ impl<E, S, const D: usize> GSA<E,S,D>
             let forces = self.update_forces(g);
             self.update_agents(forces);
 
-            if self.end_criterion() {
+            if (self.end_criterion)(&self) {
                 break
             }
         }
@@ -126,8 +130,15 @@ impl<E, S, const D: usize> GSA<E,S,D>
         }
         f
     }
-    fn end_criterion(&self) -> bool {
-        todo!()
+    fn update_agents(&mut self, forces: Vec<[f32; D]>) {
+        for (forces, agent) in forces.iter().zip(&mut self.agents) {
+            for ((f, v), x) in forces.iter().zip(&mut agent.v).zip(&mut agent.x) {
+                let a = f/agent.m;
+                let rand = self.rng.gen_range(0f32..=1f32);
+                *v = rand*(*v) + a;
+                *x = *x + *v
+            }
+        }
     }
 }
 
