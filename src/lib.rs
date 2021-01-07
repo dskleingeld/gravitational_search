@@ -10,6 +10,7 @@ use num_traits::cast::FromPrimitive;
 use std::iter::Sum;
 use std::fmt::Debug;
 use rand::distributions::uniform::SampleUniform;
+use derivative::Derivative;
 
 pub trait Number: Float + Debug + Copy + Clone 
     // + std::conv,ert::TryFrom<usize>
@@ -40,6 +41,8 @@ impl<T> Stratagy<T> for Minimize
     }
 }
 
+#[derive(Derivative)]
+#[derivative(Debug)]
 pub struct GSA<T, E, S, C, const D: usize> 
     where 
         T: Number,
@@ -47,6 +50,7 @@ pub struct GSA<T, E, S, C, const D: usize>
         S: Stratagy<T>,
         C: Fn(usize, T) -> bool,
 {
+    #[derivative(Debug="ignore")]
     rng: RandNumGen,
     agents: Vec<Agent<T,D>>,
     g0: T,
@@ -55,7 +59,9 @@ pub struct GSA<T, E, S, C, const D: usize>
     max_n: usize,
     n: usize,
     strat: PhantomData<S>,
+    #[derivative(Debug="ignore")]
     eval: E,
+    #[derivative(Debug="ignore")]
     end_criterion: C,
 }
 
@@ -66,9 +72,9 @@ impl<T, E, S, C, const D: usize> GSA<T,E,S,C,D>
         S: Stratagy<T>,
         C: Fn(usize, T) -> bool,
 {
-    pub fn new(g0: T, _t0: T, alpha: T, max_n: usize, eval: E, end_criterion: C) -> GSA<T,E,S,C,D> {
+    pub fn new(g0: T, _t0: T, alpha: T, max_n: usize, seed: u64, eval: E, end_criterion: C) -> GSA<T,E,S,C,D> {
         GSA {
-            rng: RandNumGen::seed_from_u64(0),
+            rng: RandNumGen::seed_from_u64(seed),
             agents: Vec::new(),
             alpha,
             g0,
@@ -86,6 +92,7 @@ impl<T, E, S, C, const D: usize> GSA<T,E,S,C,D>
         self.initialize_pop(population, range);
 
         loop {
+            dbg!(&self);
             self.n += 1;
             let fitness = self.eval_fitness();
             let g = self.g();
