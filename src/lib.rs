@@ -1,4 +1,8 @@
 #![feature(iterator_fold_self)]
+#![feature(test)]
+
+// needed for bench macro
+extern crate test;
 
 use rand::Rng;
 use rand_xoshiro::rand_core::SeedableRng;
@@ -104,7 +108,6 @@ impl<T, E, S, C, const D: usize> GSA<T,E,S,C,D>
                 .cloned()
                 .fold_first(S::worst).unwrap();
 
-            dbg!(g,best, worst);
             self.update_masses(best, worst, fitness);
             let forces = self.update_forces(g);
             self.update_agents(forces);
@@ -218,3 +221,29 @@ impl<T: Number, const D: usize> Agent<T,D> {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::{GSA, Minimize};
+    use test::Bencher;
+
+    pub fn f1(x: &[f32]) -> f32 {
+        x.iter().map(|x| x*x).sum()
+    }
+
+    #[bench]
+    fn bench_f1(b: &mut Bencher) {
+        let g0 = 100f32;
+        let alpha = 20f32;
+        let t0 = 20f32;
+        let max_n = 1000;
+        const SEED: u64 = 0;
+        const POPULATION: usize = 50;
+        const DIMENSION: usize = 2;
+
+        let stop = |n: usize, _| n > max_n;
+        b.iter(|| {
+            let mut gsa: GSA<_, Minimize, _, DIMENSION> = GSA::new(g0, t0, alpha, max_n, SEED, f1, stop);
+            gsa.search(-5f32..=5f32, POPULATION);
+        });
+    }
+}
