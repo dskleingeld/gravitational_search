@@ -19,7 +19,6 @@ use derivative::Derivative;
 const EPSILON: f32 = f32::EPSILON;
 
 pub trait Number: Float + Debug + Copy + Clone 
-    // + std::conv,ert::TryFrom<usize>
     + FromPrimitive
     + Sum + From<f32> + AddAssign + SampleUniform {}
 
@@ -119,7 +118,6 @@ impl<T, E, S, C, const D: usize> GSA<T,E,S,C,D>
         }
     }
     fn initialize_pop(&mut self, n: usize, range: RangeInclusive<T>) {
-        // let center = |v: &mut T| *v = (*v)*(*range.end()-*range.start())+*range.start();
         for _ in 0..n {
             let mut v = [T::zero(); D]; //TODO
             let mut x = [T::zero(); D];
@@ -129,10 +127,6 @@ impl<T, E, S, C, const D: usize> GSA<T,E,S,C,D>
             for x in &mut x {
                 *x = self.rng.gen_range(range.clone());
             }
-            // v.try_fill(&mut self.rng).unwrap();
-            // x.try_fill(&mut self.rng).unwrap();
-            // v.iter_mut().for_each(center);
-            // x.iter_mut().for_each(center);
             self.agents.push( Agent {v, x, m: T::one()})
         }
     }
