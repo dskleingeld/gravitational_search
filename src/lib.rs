@@ -242,7 +242,7 @@ mod tests {
 
         let stop = |n: usize, _| n > max_n;
         b.iter(|| {
-            let mut gsa: GSA<_, Minimize, _, DIMENSION> = GSA::new(g0, t0, alpha, max_n, SEED, f1, stop);
+            let mut gsa: GSA<f32,_, Minimize, _, DIMENSION> = GSA::new(g0, t0, alpha, max_n, SEED, f1, stop);
             gsa.search(-5f32..=5f32, POPULATION);
         });
     }
