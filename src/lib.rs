@@ -5,6 +5,7 @@ use rand_xoshiro::rand_core::SeedableRng;
 use rand_xoshiro::Xoshiro256PlusPlus as RandNumGen;
 use std::marker::PhantomData;
 use std::ops::RangeInclusive;
+use derivative::Derivative;
 
 pub trait Stratagy {
     fn best(a: f32, b: f32) -> f32;
@@ -21,12 +22,15 @@ impl Stratagy for Minimize {
     }
 }
 
+#[derive(Derivative)]
+#[derivative(Debug)]
 pub struct GSA<E, S, C, const D: usize> 
     where 
         E: Fn(&[f32]) -> f32,
         S: Stratagy,
         C: Fn(usize, f32) -> bool,
 {
+    #[derivative(Debug="ignore")]
     rng: RandNumGen,
     agents: Vec<Agent<D>>,
     g0: f32,
@@ -35,7 +39,9 @@ pub struct GSA<E, S, C, const D: usize>
     max_n: usize,
     n: usize,
     strat: PhantomData<S>,
+    #[derivative(Debug="ignore")]
     eval: E,
+    #[derivative(Debug="ignore")]
     end_criterion: C,
 }
 
@@ -45,9 +51,9 @@ impl<E, S, C, const D: usize> GSA<E,S,C,D>
         S: Stratagy,
         C: Fn(usize, f32) -> bool,
 {
-    pub fn new(g0: f32, t0: f32, alpha: f32, max_n: usize, eval: E, end_criterion: C) -> GSA<E,S,C,D> {
+    pub fn new(g0: f32, t0: f32, alpha: f32, max_n: usize, seed: u64, eval: E, end_criterion: C) -> GSA<E,S,C,D> {
         GSA {
-            rng: RandNumGen::seed_from_u64(0),
+            rng: RandNumGen::seed_from_u64(seed),
             agents: Vec::new(),
             alpha,
             g0,
@@ -65,6 +71,7 @@ impl<E, S, C, const D: usize> GSA<E,S,C,D>
         self.initialize_pop(population, range);
 
         loop {
+            dbg!(&self);
             self.n += 1;
             let fitness = self.eval_fitness();
             let g = self.g();
