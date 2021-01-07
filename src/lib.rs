@@ -12,6 +12,8 @@ use std::fmt::Debug;
 use rand::distributions::uniform::SampleUniform;
 use derivative::Derivative;
 
+const EPSILON: f32 = f32::EPSILON;
+
 pub trait Number: Float + Debug + Copy + Clone 
     // + std::conv,ert::TryFrom<usize>
     + FromPrimitive
@@ -92,7 +94,6 @@ impl<T, E, S, C, const D: usize> GSA<T,E,S,C,D>
         self.initialize_pop(population, range);
 
         loop {
-            dbg!(&self);
             self.n += 1;
             let fitness = self.eval_fitness();
             let g = self.g();
@@ -103,7 +104,7 @@ impl<T, E, S, C, const D: usize> GSA<T,E,S,C,D>
                 .cloned()
                 .fold_first(S::worst).unwrap();
 
-            // dbg!(g,best, worst);
+            dbg!(g,best, worst);
             self.update_masses(best, worst, fitness);
             let forces = self.update_forces(g);
             self.update_agents(forces);
@@ -161,7 +162,8 @@ impl<T, E, S, C, const D: usize> GSA<T,E,S,C,D>
                 // out with the divide by i.m while calculating the 
                 // acceleration later
                 // let gmmr = g*(i.m*j.m)/(r+f32::EPSILON);
-                let gmmr = g*j.m/(r+T::min_value());
+                let epsilon: T = From::from(EPSILON);
+                let gmmr = g*j.m/(r+epsilon);
                 let rand: T = From::from(self.rng.gen_range(0f32..=1f32));
                 //set value of the force in every dimension
                 for ((f, xi),xj) in f_ij.iter_mut()

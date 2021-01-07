@@ -10,9 +10,9 @@ fn main() {
     let g0 = 100f32;
     let alpha = 20f32;
     let t0 = 20f32;
-    let max_n = 3;
+    let max_n = 5;
     const SEED: u64 = 0;
-    const POPULATION: usize = 50;
+    const POPULATION: usize = 2;
     const DIMENSION: usize = 2;
 
     let stop = |n: usize, _| n > max_n;
