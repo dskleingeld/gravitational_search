@@ -15,13 +15,16 @@ use std::iter::Sum;
 use std::fmt::Debug;
 use rand::distributions::uniform::SampleUniform;
 use derivative::Derivative;
+pub use noisy_float::types::{R32, r32};
 
 const EPSILON: f32 = f32::EPSILON;
 
 pub trait Number: Float + Debug + Copy + Clone 
     + FromPrimitive
-    + Sum + From<f32> + AddAssign + SampleUniform {}
+    + std::convert::TryFrom<f32>
+    + Sum + AddAssign + SampleUniform {}
 
+impl Number for R32 {}
 impl Number for f32 {}
 impl Number for f64 {}
 
@@ -133,7 +136,7 @@ impl<T, E, S, C, const D: usize> GSA<T,E,S,C,D>
     fn g(&self) -> T {
         let n: T = T::from_usize(self.n).unwrap(); 
         let max_n: T = T::from_usize(self.max_n).unwrap();
-        let minus: T = From::from(-1.0);
+        let minus: T = T::try_from(-1.0).map_err(|_| ()).unwrap();
         self.g0*T::exp(minus*self.alpha*n/(max_n))
     }
     fn eval_fitness(&self) -> Vec<T> {
@@ -159,9 +162,9 @@ impl<T, E, S, C, const D: usize> GSA<T,E,S,C,D>
                 // out with the divide by i.m while calculating the 
                 // acceleration later
                 // let gmmr = g*(i.m*j.m)/(r+f32::EPSILON);
-                let epsilon: T = From::from(EPSILON);
+                let epsilon: T = T::try_from(EPSILON).map_err(|_| ()).unwrap();
                 let gmmr = g*j.m/(r+epsilon);
-                let rand: T = From::from(self.rng.gen_range(0f32..=1f32));
+                let rand = self.rng.gen_range(T::one()..=T::zero());
                 //set value of the force in every dimension
                 for ((f, xi),xj) in f_ij.iter_mut()
                     .zip(i.x.iter())

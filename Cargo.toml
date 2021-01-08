@@ -11,4 +11,4 @@ rand = "0.8"
 rand_xoshiro = "0.6"
 num-traits = "0.2.14"
 derivative = "2.1"
-noisy_float = "0.1"
+noisy_float = { git = "https://github.com/dskleingeld/noisy_float-rs.git", branch= "mirror_serde" }
