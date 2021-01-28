@@ -46,6 +46,11 @@ where
     end_criterion: C,
 }
 
+pub struct SearchResult<T, const D: usize> {
+    pub fitness: T,
+    pub params: [T; D],
+}
+
 impl<T, E, S, C, const D: usize> GSA<T, E, S, C, D>
 where
     T: Number,
@@ -76,16 +81,33 @@ where
         }
     }
 
-    pub fn search(&mut self, range: RangeInclusive<T>, population: usize) {
+    fn search_result(&mut self, fitness: Vec<T>, best: T) -> SearchResult<T, D> {
+        let best_idx = fitness
+            .into_iter()
+            .enumerate()
+            .find(|(_, f)| *f==best)
+            .unwrap().0;
+        SearchResult {
+            fitness: best,
+            params: self.agents[best_idx].x,
+        }
+    }
+
+    pub fn search(&mut self, range: RangeInclusive<T>, population: usize) -> SearchResult<T, D> {
         assert!(population > 1, "population has to be at least 2");
         self.initialize_pop(population, range);
 
         loop {
             self.n += 1;
             let fitness = self.eval_fitness();
+
             let g = self.g();
             let best = fitness.iter().cloned().fold_first(S::best).unwrap();
             let worst = fitness.iter().cloned().fold_first(S::worst).unwrap();
+
+            if (self.end_criterion)(self.n, best) {
+                return self.search_result(fitness, best);
+            }
 
             self.update_masses(best, worst, fitness);
             // sort the agents so the force function can use only the K best agents
@@ -94,11 +116,6 @@ where
             });
             let forces = self.update_forces(g);
             self.update_agents(forces);
-
-            if (self.end_criterion)(self.n, best) {
-                dbg!(best);
-                break;
-            }
         }
     }
     fn initialize_pop(&mut self, n: usize, range: RangeInclusive<T>) {
@@ -124,7 +141,6 @@ where
         self.agents.iter().map(|a| (self.eval)(&a.x)).collect()
     }
     fn update_masses(&mut self, best: T, worst: T, fitness: Vec<T>) {
-        dbg!(best, worst);
         let masses = fitness
             .into_iter()
             .map(move |f| (f - worst) / (best - worst));

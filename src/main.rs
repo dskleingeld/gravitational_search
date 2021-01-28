@@ -11,7 +11,7 @@ mod gsa_paper {
 }
 
 fn main() {
-    const SEED: u64 = 1;
+    const SEED: u64 = 0;
     const POPULATION: usize = 50; // check
     const DIMENSION: usize = 30; // check
 
@@ -21,7 +21,16 @@ fn main() {
     let max_n = 1_000; // check
 
     let stop = |n: usize, _| n > max_n;
-    let mut gsa: GSA<R64, _, Minimize, _, DIMENSION> =
-        GSA::new(g0, t0, alpha, max_n, SEED, gsa_paper::f1, stop);
-    gsa.search(r64(-100.)..=r64(100.), POPULATION);
+    
+    for seed in 0..100 {
+        let mut gsa: GSA<R64, _, Minimize, _, DIMENSION> =
+            GSA::new(g0, t0, alpha, max_n, seed, gsa_paper::f1, stop);
+        let res = gsa.search(r64(-100.)..=r64(100.), POPULATION);
+
+        println!("fitness: {:+e}", res.fitness);
+        println!("params:");
+        for param in &res.params {
+            println!("{:+e}", param);
+        }
+    }
 }
