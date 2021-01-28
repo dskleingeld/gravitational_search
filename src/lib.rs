@@ -3,84 +3,65 @@
 
 // needed for bench macro
 extern crate test;
+mod traits;
+pub use traits::{Minimize, Number, Stratagy};
 
+use derivative::Derivative;
+pub use noisy_float::types::{r32, R32, r64, R64};
 use rand::Rng;
 use rand_xoshiro::rand_core::SeedableRng;
 use rand_xoshiro::Xoshiro256PlusPlus as RandNumGen;
-use std::marker::PhantomData;
-use std::ops::{RangeInclusive, AddAssign};
-use num_traits::float::Float;
-use num_traits::cast::FromPrimitive;
-use std::iter::Sum;
 use std::fmt::Debug;
-use rand::distributions::uniform::SampleUniform;
-use derivative::Derivative;
-pub use noisy_float::types::{R32, r32};
+use std::marker::PhantomData;
+use std::ops::RangeInclusive;
 
 const EPSILON: f32 = f32::EPSILON;
 
-pub trait Number: Float + Debug + Copy + Clone 
-    + FromPrimitive
-    + std::convert::TryFrom<f32>
-    + Sum + AddAssign + SampleUniform {}
-
-impl Number for R32 {}
-impl Number for f32 {}
-impl Number for f64 {}
-
-pub trait Stratagy<T> 
-    where 
-        T: Number,
-{
-    fn best(a: T, b: T) -> T;
-    fn worst(a: T, b: T) -> T;
-}
-
-pub struct Minimize;
-impl<T> Stratagy<T> for Minimize 
-    where
-        T: Number,
-{
-    fn best(a: T, b: T) -> T {
-        a.min(b)
-    }
-    fn worst(a: T, b: T) -> T {
-        a.max(b)
-    }
-}
-
 #[derive(Derivative)]
 #[derivative(Debug)]
-pub struct GSA<T, E, S, C, const D: usize> 
-    where 
-        T: Number,
-        E: Fn(&[T]) -> T,
-        S: Stratagy<T>,
-        C: Fn(usize, T) -> bool,
+pub struct GSA<T, E, S, C, const D: usize>
+where
+    T: Number,
+    E: Fn(&[T]) -> T,
+    S: Stratagy<T>,
+    C: Fn(usize, T) -> bool,
 {
-    #[derivative(Debug="ignore")]
+    #[derivative(Debug = "ignore")]
     rng: RandNumGen,
-    agents: Vec<Agent<T,D>>,
+    agents: Vec<Agent<T, D>>,
     g0: T,
     alpha: T,
     // t: T,
+    // maximum iterations
     max_n: usize,
+    // dimension
     n: usize,
+    // optimization problem: minimize, maximize or something that implements Stratagy
     strat: PhantomData<S>,
-    #[derivative(Debug="ignore")]
+    #[derivative(Debug = "ignore")]
+    // the evaluation function
     eval: E,
-    #[derivative(Debug="ignore")]
+    #[derivative(Debug = "ignore")]
+    // end criterion that can be used for early stopping
     end_criterion: C,
 }
 
-impl<T, E, S, C, const D: usize> GSA<T,E,S,C,D> 
-    where 
-        T: Number,
-        E: Fn(&[T]) -> T,
-        S: Stratagy<T>,
-        C: Fn(usize, T) -> bool,
+impl<T, E, S, C, const D: usize> GSA<T, E, S, C, D>
+where
+    T: Number,
+    E: Fn(&[T]) -> T,
+    S: Stratagy<T>,
+    C: Fn(usize, T) -> bool,
 {
-    pub fn new(g0: T, _t0: T, alpha: T, max_n: usize, seed: u64, eval: E, end_criterion: C) -> GSA<T,E,S,C,D> {
+    pub fn new(
+        g0: T,
+        _t0: T,
+        alpha: T,
+        max_n: usize,
+        seed: u64,
+        eval: E,
+        end_criterion: C,
+    ) -> GSA<T, E, S, C, D> {
         GSA {
             rng: RandNumGen::seed_from_u64(seed),
             agents: Vec::new(),
@@ -103,20 +84,20 @@ impl<T, E, S, C, const D: usize> GSA<T,E,S,C,D>
             self.n += 1;
             let fitness = self.eval_fitness();
             let g = self.g();
-            let best = fitness.iter()
-                .cloned()
-                .fold_first(S::best).unwrap();
-            let worst = fitness.iter()
-                .cloned()
-                .fold_first(S::worst).unwrap();
+            let best = fitness.iter().cloned().fold_first(S::best).unwrap();
+            let worst = fitness.iter().cloned().fold_first(S::worst).unwrap();
 
             self.update_masses(best, worst, fitness);
+            // sort the agents so the force function can use only the K best agents
+            self.agents.sort_unstable_by(|a, b| {
+                b.m.partial_cmp(&a.m).expect("agent mass must never be NaN")
+            });
             let forces = self.update_forces(g);
             self.update_agents(forces);
 
             if (self.end_criterion)(self.n, best) {
                 dbg!(best);
-                break
+                break;
             }
         }
     }
@@ -130,46 +111,60 @@ impl<T, E, S, C, const D: usize> GSA<T,E,S,C,D>
             for x in &mut x {
                 *x = self.rng.gen_range(range.clone());
             }
-            self.agents.push( Agent {v, x, m: T::one()})
+            self.agents.push(Agent { v, x, m: T::one() })
         }
     }
     fn g(&self) -> T {
-        let n: T = T::from_usize(self.n).unwrap(); 
+        let n: T = T::from_usize(self.n).unwrap();
         let max_n: T = T::from_usize(self.max_n).unwrap();
         let minus: T = T::try_from(-1.0).map_err(|_| ()).unwrap();
-        self.g0*T::exp(minus*self.alpha*n/(max_n))
+        self.g0 * T::exp(minus * self.alpha * n / (max_n))
     }
     fn eval_fitness(&self) -> Vec<T> {
-        self.agents.iter()
-            .map(|a| (self.eval)(&a.x))
-            .collect()
+        self.agents.iter().map(|a| (self.eval)(&a.x)).collect()
     }
     fn update_masses(&mut self, best: T, worst: T, fitness: Vec<T>) {
-        let masses = fitness.into_iter().map(move |f| (f-worst)/(best-worst));
+        dbg!(best, worst);
+        let masses = fitness
+            .into_iter()
+            .map(move |f| (f - worst) / (best - worst));
         let sum: T = masses.clone().sum();
-        let masses = masses.map(move |m| m/sum);
+        let masses = masses.map(move |m| m / sum);
         for (mass, agent) in masses.zip(self.agents.iter_mut()) {
             agent.m = mass;
         }
     }
+    fn k(&self) -> usize {
+        let population = self.agents.len() as f32;
+        let progress = self.n as f32/ self.max_n as f32;
+        let k = population - population*progress + 1f32;
+        k.trunc() as usize
+    }
     fn update_forces(&mut self, g: T) -> Vec<[T; D]> {
+        let k = self.k();
         let mut f: Vec<[T; D]> = Vec::with_capacity(self.agents.len());
+        // calculating net force on agent i
         for i in &self.agents {
             let mut f_ij = [T::zero(); D];
-            for j in self.agents.iter().filter(|j| **j != *i) {
+            // agents j attracting agent i
+            for j in self
+                .agents
+                .iter()
+                .filter(|j| **j != *i)
+                .take(k)
+            // only take K best agents, linearly decreasing
+            {
                 let r = i.euclid_dist(j);
-                // removed the multiplication with i.m as it cancels 
-                // out with the divide by i.m while calculating the 
+                // removed the multiplication with i.m as it cancels
+                // out with the divide by i.m while calculating the
                 // acceleration later
                 // let gmmr = g*(i.m*j.m)/(r+f32::EPSILON);
-                let epsilon: T = T::try_from(EPSILON).map_err(|_| ()).unwrap();
-                let gmmr = g*j.m/(r+epsilon);
-                let rand = self.rng.gen_range(T::zero()..=T::one());
+                let epsilon: T = T::try_from(EPSILON.into()).map_err(|_| ()).unwrap();
+                let gmmr = g * j.m / (r + epsilon);
                 //set value of the force in every dimension
-                for ((f, xi),xj) in f_ij.iter_mut()
-                    .zip(i.x.iter())
-                    .zip(j.x.iter()) {
-                    *f += gmmr*(*xj-*xi)*rand;
+                for ((f, xi), xj) in f_ij.iter_mut().zip(i.x.iter()).zip(j.x.iter()) {
+                    let rand = self.rng.gen_range(T::zero()..=T::one());
+                    *f += gmmr * (*xj - *xi) * rand;
                 }
             }
             f.push(f_ij);
@@ -182,7 +177,7 @@ impl<T, E, S, C, const D: usize> GSA<T,E,S,C,D>
             for ((f, v), x) in forces.iter().zip(&mut agent.v).zip(&mut agent.x) {
                 // let a = f/agent.m;
                 let a = f;
-                *v = rand*(*v) + *a;
+                *v = rand * (*v) + *a;
                 *x += *v
             }
         }
@@ -190,12 +185,12 @@ impl<T, E, S, C, const D: usize> GSA<T,E,S,C,D>
 }
 
 use std::fmt;
-impl<T, E, S, C, const D: usize> fmt::Display for GSA<T,E,S,C,D>
-    where 
-        T: Number,
-        E: Fn(&[T]) -> T,
-        S: Stratagy<T>,
-        C: Fn(usize, T) -> bool,
+impl<T, E, S, C, const D: usize> fmt::Display for GSA<T, E, S, C, D>
+where
+    T: Number,
+    E: Fn(&[T]) -> T,
+    S: Stratagy<T>,
+    C: Fn(usize, T) -> bool,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "iteration: {}", self.n)
@@ -209,10 +204,12 @@ struct Agent<T, const D: usize> {
     m: T,
 }
 
-impl<T: Number, const D: usize> Agent<T,D> {
-    pub fn euclid_dist(&self, other: &Agent<T,D>) -> T {
-        self.x.iter().zip(other.x.iter())
-            .map(|(p,q)| (*p-*q).powi(2))
+impl<T: Number, const D: usize> Agent<T, D> {
+    pub fn euclid_dist(&self, other: &Agent<T, D>) -> T {
+        self.x
+            .iter()
+            .zip(other.x.iter())
+            .map(|(p, q)| (*p - *q).powi(2))
             .sum::<T>()
             .sqrt()
     }
@@ -220,11 +217,11 @@ impl<T: Number, const D: usize> Agent<T,D> {
 
 #[cfg(test)]
 mod tests {
-    use super::{GSA, Minimize};
+    use super::{Minimize, GSA};
     use test::Bencher;
 
     pub fn f1(x: &[f32]) -> f32 {
-        x.iter().map(|x| x*x).sum()
+        x.iter().map(|x| x * x).sum()
     }
 
     #[bench]
@@ -239,7 +236,8 @@ mod tests {
 
         let stop = |n: usize, _| n > max_n;
         b.iter(|| {
-            let mut gsa: GSA<f32,_, Minimize, _, DIMENSION> = GSA::new(g0, t0, alpha, max_n, SEED, f1, stop);
+            let mut gsa: GSA<f32, _, Minimize, _, DIMENSION> =
+                GSA::new(g0, t0, alpha, max_n, SEED, f1, stop);
             gsa.search(-5f32..=5f32, POPULATION);
         });
     }
