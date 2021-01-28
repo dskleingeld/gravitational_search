@@ -164,7 +164,7 @@ impl<T, E, S, C, const D: usize> GSA<T,E,S,C,D>
                 // let gmmr = g*(i.m*j.m)/(r+f32::EPSILON);
                 let epsilon: T = T::try_from(EPSILON).map_err(|_| ()).unwrap();
                 let gmmr = g*j.m/(r+epsilon);
-                let rand = self.rng.gen_range(T::one()..=T::zero());
+                let rand = self.rng.gen_range(T::zero()..=T::one());
                 //set value of the force in every dimension
                 for ((f, xi),xj) in f_ij.iter_mut()
                     .zip(i.x.iter())
