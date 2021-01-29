@@ -3,10 +3,30 @@ use grav_search::{r64, R64};
 use grav_search::{Minimize, GSA};
 
 mod gsa_paper {
+    use grav_search::Number;
     use std::iter::Sum;
     use std::ops::Mul;
+
+    /// GSA paper function F1, GSASA function F1 
     pub fn f1<T: Copy + Mul + Sum<<T as Mul>::Output>>(x: &[T]) -> T {
         x.iter().map(|x| (*x) * (*x)).sum()
+    }
+    /// GSA paper function F5, GSASA function F3 
+    pub fn f2<T: Number>(x: &[T]) -> T {
+        let c100: T = T::from_f64(100f64).unwrap();
+        x.chunks(2).map(|x| {
+            c100 * (x[1] - x[0].powi(2)).powi(2) + (x[0] - T::one()).powi(2) 
+        }).sum()
+    }
+    /// GSASA function F3, does not appear in GSA paper
+    pub fn f3<T: Number>(x: &[T]) -> T {
+        let half = T::from_f64(0.5f64).unwrap();
+        let small = T::from_f64(0.001f64).unwrap();
+        let sqrt = (x[0].powi(2) + x[1].powi(2)).sqrt();
+        let num = sqrt.sin().powi(2) - half;
+        let denum = T::one() + small * (x[0].powi(2)+x[1].powi(2));
+        let denum = denum.powi(2);
+        num.div(denum)
     }
 }
 
@@ -24,13 +44,13 @@ fn main() {
     
     for seed in 0..100 {
         let mut gsa: GSA<R64, _, Minimize, _, DIMENSION> =
-            GSA::new(g0, t0, alpha, max_n, seed, gsa_paper::f1, stop);
-        let res = gsa.search(r64(-100.)..=r64(100.), POPULATION);
+            GSA::new(g0, t0, alpha, max_n, seed, gsa_paper::f2, stop);
+        let res = gsa.search(r64(-30.)..=r64(30.), POPULATION);
 
         println!("fitness: {:+e}", res.fitness);
-        println!("params:");
-        for param in &res.params {
-            println!("{:+e}", param);
-        }
+        // println!("params:");
+        // for param in &res.params {
+        //     println!("{:+e}", param);
+        // }
     }
 }
