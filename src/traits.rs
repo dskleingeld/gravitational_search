@@ -45,3 +45,13 @@ where
         a.max(b)
     }
 }
+
+use super::Agent;
+pub trait Stats<T: Number, const D: usize> {
+    fn gather(&mut self, agents: &[Agent<T,D>], best: T, worst: T, g: T, fitness: &[T]);
+}
+
+pub struct NoStats;
+impl<T: Number, const D: usize> Stats<T, D> for NoStats {
+    fn gather(&mut self, _: &[Agent<T,D>], _: T, _: T, _: T, _: &[T]) {}
+}

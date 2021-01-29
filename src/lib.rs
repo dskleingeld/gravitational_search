@@ -4,7 +4,9 @@
 // needed for bench macro
 extern crate test;
 mod traits;
-pub use traits::{Minimize, Number, Stratagy};
+mod stats;
+pub use traits::{Minimize, Number, Stratagy, Stats};
+pub use stats::TrackFitness;
 
 use derivative::Derivative;
 pub use noisy_float::types::{r32, R32, r64, R64};
@@ -94,6 +96,11 @@ where
     }
 
     pub fn search(&mut self, range: RangeInclusive<T>, population: usize) -> SearchResult<T, D> {
+        let mut stats = traits::NoStats;
+        self.search_w_stats(range, population, &mut stats)
+    }
+
+    pub fn search_w_stats(&mut self, range: RangeInclusive<T>, population: usize, stats: &mut impl Stats<T,D>) -> SearchResult<T, D> {
         assert!(population > 1, "population has to be at least 2");
         self.initialize_pop(population, range);
 
@@ -105,6 +112,7 @@ where
             let best = fitness.iter().cloned().fold_first(S::best).unwrap();
             let worst = fitness.iter().cloned().fold_first(S::worst).unwrap();
 
+            stats.gather(&self.agents, best, worst, g, &fitness);
             if (self.end_criterion)(self.n, best) {
                 return self.search_result(fitness, best);
             }
@@ -118,6 +126,7 @@ where
             self.update_agents(forces);
         }
     }
+
     fn initialize_pop(&mut self, n: usize, range: RangeInclusive<T>) {
         for _ in 0..n {
             let mut v = [T::zero(); D]; //TODO
@@ -214,7 +223,7 @@ where
 }
 
 #[derive(PartialEq, Debug)]
-struct Agent<T, const D: usize> {
+pub struct Agent<T, const D: usize> {
     v: [T; D],
     x: [T; D],
     m: T,

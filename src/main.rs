@@ -1,6 +1,9 @@
+use std::fs::File;
+
 // use grav_search::{r32, R32};
 use grav_search::{r64, R64};
 use grav_search::{Minimize, GSA};
+use grav_search::TrackFitness;
 
 mod gsa_paper {
     use grav_search::Number;
@@ -42,15 +45,13 @@ fn main() {
 
     let stop = |n: usize, _| n > max_n;
     
+    let mut file = File::create("data/f1.stats").unwrap();
     for seed in 0..100 {
+        let mut stats = TrackFitness::default();
         let mut gsa: GSA<R64, _, Minimize, _, DIMENSION> =
             GSA::new(g0, t0, alpha, max_n, seed, gsa_paper::f2, stop);
-        let res = gsa.search(r64(-30.)..=r64(30.), POPULATION);
+        let res = gsa.search_w_stats(r64(-30.)..=r64(30.), POPULATION, &mut stats);
+        stats.best_to_file(&mut file);
 
-        println!("fitness: {:+e}", res.fitness);
-        // println!("params:");
-        // for param in &res.params {
-        //     println!("{:+e}", param);
-        // }
     }
 }
