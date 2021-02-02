@@ -51,6 +51,7 @@ where
 pub struct SearchResult<T, const D: usize> {
     pub fitness: T,
     pub params: [T; D],
+    pub early_return: bool,
 }
 
 impl<T, E, S, C, const D: usize> GSA<T, E, S, C, D>
@@ -83,7 +84,7 @@ where
         }
     }
 
-    fn search_result(&mut self, fitness: Vec<T>, best: T) -> SearchResult<T, D> {
+    fn search_result(&mut self, fitness: Vec<T>, best: T, has_nan: bool) -> SearchResult<T, D> {
         let best_idx = fitness
             .into_iter()
             .enumerate()
@@ -92,15 +93,18 @@ where
         SearchResult {
             fitness: best,
             params: self.agents[best_idx].x,
+            early_return: has_nan,
         }
     }
 
-    pub fn search(&mut self, range: RangeInclusive<T>, population: usize) -> SearchResult<T, D> {
+    pub fn search(&mut self, range: RangeInclusive<T>, population: usize)
+        -> SearchResult<T, D> {
         let mut stats = traits::NoStats;
         self.search_w_stats(range, population, &mut stats)
     }
 
-    pub fn search_w_stats(&mut self, range: RangeInclusive<T>, population: usize, stats: &mut impl Stats<T,D>) -> SearchResult<T, D> {
+    pub fn search_w_stats(&mut self, range: RangeInclusive<T>, population: usize, stats: &mut impl Stats<T,D>)
+        -> SearchResult<T, D> {
         assert!(population > 1, "population has to be at least 2");
         self.initialize_pop(population, range);
 
@@ -112,19 +116,26 @@ where
             let best = fitness.iter().cloned().fold_first(S::best).unwrap();
             let worst = fitness.iter().cloned().fold_first(S::worst).unwrap();
 
+            self.update_masses(best, worst, &fitness);
+
+            // stop if any of the masses turned nan or if we reach
+            // the end criterion
             stats.gather(&self.agents, best, worst, g, &fitness);
-            if (self.end_criterion)(self.n, best) {
-                return self.search_result(fitness, best);
+            if (self.end_criterion)(self.n, best) || self.mass_not_finite() {
+                return self.search_result(fitness, best, self.mass_not_finite());
             }
 
-            self.update_masses(best, worst, fitness);
             // sort the agents so the force function can use only the K best agents
             self.agents.sort_unstable_by(|a, b| {
-                b.m.partial_cmp(&a.m).expect("agent mass must never be NaN")
+                b.m.partial_cmp(&a.m).unwrap()
             });
             let forces = self.update_forces(g);
             self.update_agents(forces);
         }
+    }
+
+    fn mass_not_finite(&self) -> bool {
+        self.agents.iter().find(|a| !a.m.is_finite()).is_some()
     }
 
     fn initialize_pop(&mut self, n: usize, range: RangeInclusive<T>) {
@@ -149,10 +160,10 @@ where
     fn eval_fitness(&self) -> Vec<T> {
         self.agents.iter().map(|a| (self.eval)(&a.x)).collect()
     }
-    fn update_masses(&mut self, best: T, worst: T, fitness: Vec<T>) {
+    fn update_masses(&mut self, best: T, worst: T, fitness: &[T]) {
         let masses = fitness
-            .into_iter()
-            .map(move |f| (f - worst) / (best - worst));
+            .iter()
+            .map(move |f| (*f - worst) / (best - worst));
         let sum: T = masses.clone().sum();
         let masses = masses.map(move |m| m / sum);
         for (mass, agent) in masses.zip(self.agents.iter_mut()) {
