@@ -8,6 +8,7 @@ mod stats;
 pub use traits::{Minimize, Number, Stratagy, Stats};
 pub use stats::TrackFitness;
 
+use itertools::izip;
 use derivative::Derivative;
 pub use noisy_float::types::{r32, R32, r64, R64};
 use rand::Rng;
@@ -33,7 +34,8 @@ where
     agents: Vec<Agent<T, D>>,
     g0: T,
     alpha: T,
-    // t: T,
+    // start temperature for annealing
+    t0: T,
     // maximum iterations
     max_n: usize,
     // dimension
@@ -63,7 +65,7 @@ where
 {
     pub fn new(
         g0: T,
-        _t0: T,
+        t0: T,
         alpha: T,
         max_n: usize,
         seed: u64,
@@ -75,7 +77,7 @@ where
             agents: Vec::new(),
             alpha,
             g0,
-            // t: t0,
+            t0,
             max_n,
             n: 0,
             strat: PhantomData,
@@ -98,7 +100,8 @@ where
     }
 
     pub fn search(&mut self, range: RangeInclusive<T>, population: usize)
-        -> SearchResult<T, D> {
+        -> SearchResult<T, D> 
+    {
         let mut stats = traits::NoStats;
         self.search_w_stats(range, population, &mut stats)
     }
@@ -130,7 +133,8 @@ where
                 b.m.partial_cmp(&a.m).unwrap()
             });
             let forces = self.update_forces(g);
-            self.update_agents(forces);
+            // self.update_agents(forces);
+            self.update_agents_annealed(forces, &fitness);
         }
     }
 
@@ -140,7 +144,7 @@ where
 
     fn initialize_pop(&mut self, n: usize, range: RangeInclusive<T>) {
         for _ in 0..n {
-            let mut v = [T::zero(); D]; //TODO
+            let mut v = [T::zero(); D];
             let mut x = [T::zero(); D];
             for v in &mut v {
                 *v = self.rng.gen_range(range.clone());
@@ -218,6 +222,45 @@ where
             }
         }
     }
+    /// TODO currently only works for minimization
+    fn t(&self) -> T { // TODO more interesting options: (geometric reduction, slow-decrease)
+        let n: T = T::from_usize(self.n).unwrap();
+        let max_n: T = T::from_usize(self.max_n).unwrap();
+        let alpha = T::one()/max_n;
+        self.t0 - alpha 
+    }
+    /// TODO currently only works for minimization
+    fn update(f: &[T;D], old_agent: &Agent<T,D>, rng: &mut RandNumGen) -> Agent<T, D> {
+        let mut agent = old_agent.clone();
+        let rand = rng.gen_range(T::zero()..=T::one());
+        for (x,x_new,v,v_new,f) in izip!(
+            old_agent.x.iter().copied(),
+            agent.x.iter_mut(),
+            old_agent.v.iter().copied(),
+            agent.v.iter_mut(),
+            f.iter().copied()) {
+
+            *v_new = rand * v + f;
+            *x_new = x + *v_new;
+        }
+        agent
+    }
+    /// TODO currently only works for minimization
+    fn update_agents_annealed(&mut self, forces: Vec<[T; D]>, fitness: &[T]) {
+        let t = self.t();
+        for (force, agent, fit_old) in izip!(forces.iter(), &mut self.agents, fitness.iter().cloned()) {
+            let new = Self::update(force, agent, &mut self.rng);
+            let fit_new = (self.eval)(&new.x);
+            
+            let rand = self.rng.gen_range(T::zero()..=T::one());
+            let div = (fit_new - fit_old)/t;
+            let exp = (-T::one() * div).exp();
+
+            if fit_new <= fit_old || rand <= exp {
+                *agent = new
+            }
+        }
+    }
 }
 
 use std::fmt;
@@ -233,11 +276,20 @@ where
     }
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone)]
 pub struct Agent<T, const D: usize> {
     v: [T; D],
     x: [T; D],
     m: T,
+}
+impl<T: Number, const D:usize> Agent<T,D> {
+    fn new() -> Self {
+        Agent {
+            v: [T::zero(); D],
+            x: [T::zero(); D],
+            m: T::one(),
+        }
+    }
 }
 
 impl<T: Number, const D: usize> Agent<T, D> {

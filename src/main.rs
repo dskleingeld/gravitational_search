@@ -40,7 +40,8 @@ fn main() {
 
     let g0 = r64(100.); // check
     let alpha = r64(20.); // check
-    let t0 = r64(1_000.); // unused
+    let t0 = r64(1_000.);
+    // let kb = r64() //check
     let max_n = 1_000; // check
 
     let stop = |n: usize, _| n > max_n;
