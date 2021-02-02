@@ -45,15 +45,14 @@ fn main() {
 
     let stop = |n: usize, _| n > max_n;
     
-    let mut file = File::create("data/f1.stats").unwrap();
-    for seed in 0..100 {
-        let mut stats = TrackFitness::default();
-        let mut gsa: GSA<R64, _, Minimize, _, DIMENSION> =
-            GSA::new(g0, t0, alpha, max_n, seed, gsa_paper::f1, stop);
-        let res = gsa.search_w_stats(r64(-100.)..=r64(100.), POPULATION, &mut stats);
-        // fitness += res.fitness.raw();
-        stats.best_to_file(&mut file);
-    }
+    // let mut file = File::create("data/f1.best").unwrap();
+    // for seed in 0..100 {
+    //     let mut stats = TrackFitness::default();
+    //     let mut gsa: GSA<R64, _, Minimize, _, DIMENSION> =
+    //         GSA::new(g0, t0, alpha, max_n, seed, gsa_paper::f1, stop);
+    //     let _res = gsa.search_w_stats(r64(-100.)..=r64(100.), POPULATION, &mut stats);
+    //     stats.best_to_file(&mut file);
+    // }
 
     // let mut file = File::create("data/f2.stats").unwrap();
     // for seed in 0..100 {
@@ -63,12 +62,13 @@ fn main() {
     //     let res = gsa.search_w_stats(r64(-30.)..=r64(30.), POPULATION, &mut stats);
     //     stats.best_to_file(&mut file);
     // }
-    // let mut file = File::create("data/f3.stats").unwrap();
-    // for seed in 0..100 {
-    //     let mut stats = TrackFitness::default();
-    //     let mut gsa: GSA<R64, _, Minimize, _, DIMENSION> =
-    //         GSA::new(g0, t0, alpha, max_n, seed, gsa_paper::f3, stop);
-    //     let res = gsa.search_w_stats(r64(-100.)..=r64(100.), POPULATION, &mut stats);
-    //     stats.best_to_file(&mut file);
-    // }
+
+    let mut file = File::create("data/f3.stats").unwrap();
+    for seed in 0..100 {
+        let mut stats = TrackFitness::default();
+        let mut gsa: GSA<R64, _, Minimize, _, DIMENSION> =
+            GSA::new(g0, t0, alpha, max_n, seed, gsa_paper::f3, stop);
+        let res = gsa.search_w_stats(r64(-100.)..=r64(100.), POPULATION, &mut stats);
+        stats.best_to_file(&mut file);
+    }
 }
