@@ -1,0 +1,10 @@
+The interaction between the particles are governed by Newtons laws, given the mass (fitness) and position (parameters) of each particle (solution) we can derive how they move. Below the $m$ is the mass of our particle for whom we want to know its next position, $M$ is the mass of the other particle, $G$ a constant and $\vec{a}$ how our particle will accelerate
+%
+\begin{align}
+	\vec{F}&=m\vec{a} &            \vec{F}&=\frac{GmM}{R^2} \\
+	m\vec{a} &= \frac{GmM}{R^2} \\
+	\vec{a} &= \frac{GM}{R^2}
+\end{align}
+%
+We see $\vec{a}$ does not depend on $m$, without this result any solution with a fitness of zero would ruin the search turning all values into \texttt{Nan}. To get to 
+
