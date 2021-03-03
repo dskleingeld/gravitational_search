@@ -4,15 +4,16 @@
 \usepackage[backend=biber]{biblatex}
 \addbibresource{References.bib}
 
-\usepackage[hidelinks]{hyperref}
+% \usepackage[hidelinks]{hyperref}
+\usepackage{cleveref}
 \usepackage{graphicx} % allow embedded images
   \setkeys{Gin}{width=\linewidth,totalheight=\textheight,keepaspectratio}
-  \graphicspath{{../figs/}} % set of paths to search for images
+  \graphicspath{{../plots/}} % set of paths to search for images
 \usepackage{ragged2e}
 \usepackage{ctable}
 % \usepackage{float}
-% \usepackage{subcaption}
-%   \captionsetup{compatibility=false}
+\usepackage{subcaption}
+  \captionsetup{compatibility=false}
 % \usepackage[toc,page]{appendix} %appendices with sections
 % \usepackage{amsmath}  % extended mathematics
 % \usepackage{booktabs} % book-quality tables
@@ -21,6 +22,7 @@
 % \usepackage{lipsum}   % filler text
 % \usepackage{fancyvrb} % extended verbatim environments
 % \usepackage{multicol} % multi column lists
+\input{resume}
 
 \raggedright
 \colortheme{skdoc}
@@ -37,10 +39,12 @@
 
 \section{Introduction}
 \input{content/intro}
+\section{Theory}
+\input{content/theory}
 \section{Implementation}
 \input{content/impl}
-%\section{Results}
-%\input{content/res}
+\section{Results}
+\input{content/res}
 %\section{Conclusion}
 %\input{content/conclusion}
 

@@ -1,10 +1,25 @@
-The interaction between the particles are governed by Newtons laws, given the mass (fitness) and position (parameters) of each particle (solution) we can derive how they move. Below the $m$ is the mass of our particle for whom we want to know its next position, $M$ is the mass of the other particle, $G$ a constant and $\vec{a}$ how our particle will accelerate
+For GSA \cref{eq:G} is used to calculate $G$ at each timestep. With $g_0$ and $\alpha$ paramaters of the search and $N$ the total number of search iterations.
 %
-\begin{align}
-	\vec{F}&=m\vec{a} &            \vec{F}&=\frac{GmM}{R^2} \\
-	m\vec{a} &= \frac{GmM}{R^2} \\
-	\vec{a} &= \frac{GM}{R^2}
+\begin{align} \label{eq:G}
+	G_i = g_0 \cdot e^{- \alpha * i/N}
 \end{align}
 %
-We see $\vec{a}$ does not depend on $m$, without this result any solution with a fitness of zero would ruin the search turning all values into \texttt{Nan}. To get to 
+As cooling function for GABSA we used simple linear cooling starting at at temperature $t0$ as in \cref{eq:cooling}. Here $P$ is the number of particles, $N$ the number of search steps and $i$ the current step, starting at $1$.
+%
+\begin{align} \label{eq:cooling}
+	T_i = P - \frac{P}{i/N} + 1
+\end{align}
+%
+\subsection{Code}
+I chose to write the implementation of GSA from scratch in \textit{Rust}\footnote{https://en.wikipedia.org/wiki/Rust\_(programming\_language)}. Rust was chosen as I am interested in seeing how suitable Rust is for such work, additionally the performance is welcome during testing. The result is a GSA object keeping track of the problem and search parameters and optional methods to set a seed for the random generator, chose weather to use annealing (GABSA) and finally to search with or without gathering statistics.
 
+To create a GSA object we need:
+%
+\begin{enumerate}
+\item $g_0$ and $\alpha$
+\item the maximum number of search steps $N$
+\item the evaluation function that takes an array of input values and returns a single number
+\item the end criterion, a function that given the current iteration and best solution decides if the seach should continue
+\end{enumerate}
+%
+To start a search call either \textit{search} with the search range and population size to use or call \textit{seach\_w\_stats} with an additional \textit{stats} argument that implements the \textit{Stats} trait. One such object that is provided is \textit{TrackFitness}, it keeps track of the average and best fitness during the search.
