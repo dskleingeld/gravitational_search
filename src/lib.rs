@@ -1,4 +1,3 @@
-#![feature(iterator_fold_self)]
 #![feature(test)]
 
 // needed for bench macro
@@ -35,7 +34,8 @@ where
     g0: T,
     alpha: T,
     // start temperature for annealing
-    t0: T,
+    // None if we should not anneal
+    t0: Option<T>,
     // maximum iterations
     max_n: usize,
     // dimension
@@ -65,25 +65,31 @@ where
 {
     pub fn new(
         g0: T,
-        t0: T,
         alpha: T,
         max_n: usize,
-        seed: u64,
         eval: E,
         end_criterion: C,
     ) -> GSA<T, E, S, C, D> {
         GSA {
-            rng: RandNumGen::seed_from_u64(seed),
+            rng: RandNumGen::seed_from_u64(0),
             agents: Vec::new(),
             alpha,
             g0,
-            t0,
+            t0: None,
             max_n,
             n: 0,
             strat: PhantomData,
             eval,
             end_criterion,
         }
+    }
+    pub fn with_annealing(mut self, t0: T) -> Self {
+        self.t0 = Some(t0);
+        self
+    }
+    pub fn seed(mut self, seed: u64) -> Self {
+        self.rng = RandNumGen::seed_from_u64(seed);
+        self
     }
 
     fn search_result(&mut self, fitness: Vec<T>, best: T, has_nan: bool) -> SearchResult<T, D> {
@@ -116,30 +122,39 @@ where
             let fitness = self.eval_fitness();
 
             let g = self.g();
-            let best = fitness.iter().cloned().fold_first(S::best).unwrap();
-            let worst = fitness.iter().cloned().fold_first(S::worst).unwrap();
+            let best = fitness.iter().cloned().reduce(S::best).unwrap();
+            let worst = fitness.iter().cloned().reduce(S::worst).unwrap();
+
+            if Self::converged(best,worst) { // converged to a single point, can not search further
+                stats.gather(&self.agents, best, worst, g, &fitness);
+                return self.search_result(fitness, best, true);
+            }
 
             self.update_masses(best, worst, &fitness);
-
-            // stop if any of the masses turned nan or if we reach
-            // the end criterion
             stats.gather(&self.agents, best, worst, g, &fitness);
-            if (self.end_criterion)(self.n, best) || self.mass_not_finite() {
-                return self.search_result(fitness, best, self.mass_not_finite());
+
+            //halt if we reach the end criterion
+            if (self.end_criterion)(self.n, best) {
+                return self.search_result(fitness, best, false);
             }
 
             // sort the agents so the force function can use only the K best agents
             self.agents.sort_unstable_by(|a, b| {
                 b.m.partial_cmp(&a.m).unwrap()
             });
+
             let forces = self.update_forces(g);
-            // self.update_agents(forces);
-            self.update_agents_annealed(forces, &fitness);
+            if let Some(t0) = self.t0 {
+                let temp = self.t(t0);
+                self.update_agents_annealed(temp, forces, &fitness);
+            } else {
+                self.update_agents(forces);
+            }
         }
     }
 
-    fn mass_not_finite(&self) -> bool {
-        self.agents.iter().find(|a| !a.m.is_finite()).is_some()
+    fn converged(best: T, worst: T) -> bool {
+        best == worst
     }
 
     fn initialize_pop(&mut self, n: usize, range: RangeInclusive<T>) {
@@ -167,7 +182,7 @@ where
     fn update_masses(&mut self, best: T, worst: T, fitness: &[T]) {
         let masses = fitness
             .iter()
-            .map(move |f| (*f - worst) / (best - worst));
+            .map(move |f| (*f - worst) / (best - worst)); //TODO FIXME div by zero (but how...)
         let sum: T = masses.clone().sum();
         let masses = masses.map(move |m| m / sum);
         for (mass, agent) in masses.zip(self.agents.iter_mut()) {
@@ -223,11 +238,11 @@ where
         }
     }
     /// TODO currently only works for minimization
-    fn t(&self) -> T { // TODO more interesting options: (geometric reduction, slow-decrease)
+    fn t(&self, t0: T) -> T { // TODO more interesting options: (geometric reduction, slow-decrease)
         let n: T = T::from_usize(self.n).unwrap();
         let max_n: T = T::from_usize(self.max_n).unwrap();
-        let alpha = T::one()/max_n;
-        self.t0 - alpha 
+        let alpha = T::from_f64(0.01).unwrap();
+        t0 - alpha 
     }
     /// TODO currently only works for minimization
     fn update(f: &[T;D], old_agent: &Agent<T,D>, rng: &mut RandNumGen) -> Agent<T, D> {
@@ -246,14 +261,13 @@ where
         agent
     }
     /// TODO currently only works for minimization
-    fn update_agents_annealed(&mut self, forces: Vec<[T; D]>, fitness: &[T]) {
-        let t = self.t();
+    fn update_agents_annealed(&mut self, temp: T, forces: Vec<[T; D]>, fitness: &[T]) {
         for (force, agent, fit_old) in izip!(forces.iter(), &mut self.agents, fitness.iter().cloned()) {
             let new = Self::update(force, agent, &mut self.rng);
             let fit_new = (self.eval)(&new.x);
             
             let rand = self.rng.gen_range(T::zero()..=T::one());
-            let div = (fit_new - fit_old)/t;
+            let div = (fit_new - fit_old)/temp;
             let exp = (-T::one() * div).exp();
 
             if fit_new <= fit_old || rand <= exp {

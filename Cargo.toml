@@ -6,6 +6,14 @@ edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[[bin]]
+name = "gsa"
+path = "src/gsa.rs"
+
+[[bin]]
+name = "gabsa"
+path = "src/gabsa.rs"
+
 [dependencies]
 rand = "0.8"
 rand_xoshiro = "0.6"
