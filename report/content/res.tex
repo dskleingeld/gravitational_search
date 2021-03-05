@@ -1,5 +1,6 @@
-Here I will present my GSA implementation compared to the original GSA\cite{GSA} paper for the test functions $f_{1_{gsa}}$ and $f_{2_{gsa}}$ presented in that paper. Then I will compare my GABSA implementation to its paper\cite{GABSA} for the functions $f_{1_{gasba}}$, $f_{2_{gabsa}}$ and $f_{3_{gabsa}}$ presented there. And finally I will show my GSA and GABSA implementation compared for $f_{1_{gsa}}$, $f_{2_{gsa}}$ and $f_{_{3_{gabsa}}}$. 
-The suffix to a function $f_{i_\text{suffix}}$ refers to the paper not the method used. In practise the only difference for $f_1$ and $f_2$ is the dimensionallity. See \cref{tab:functions} for the definition of these functions and \cref{tab:params} for the paramaters used. For each function 100 searches where performed.
+Here I will present my GSA implementation compared to test functions from both papers: $f_{1_{gsa}}$ and $f_{2_{gsa}}$ from the GSA paper and by $f_{1_{gasba}}$ $f_{2_{gabsa}}$ and $f_{3_{gabsa}}$ from the GABSA paper. Finally I will show my GSA and GABSA implementation compared for $f_{1_{gsa}}$, $f_{2_{gsa}}$ and $f_{_{3_{gabsa}}}$\footnote{The suffix to a function $f_{i_\text{suffix}}$ refers to the paper not the method used}.
+
+In practise the only difference for $f_1$ and $f_2$ is the dimensionallity. See \cref{tab:functions} for the definition of these functions and \cref{tab:params} for the paramaters used. For each function 100 searches where performed.
 %
 \ctable[
 	caption = Test functions used,
@@ -15,45 +16,51 @@ $f_{3_{gabsa}}$& $0.5+\frac{\text{sin}^2{\sqrt{x_1^2+x_2^2}}-0.5}{\left[1+0.001\
 }
 
 \ctable[
-	caption = Paramaters used for the gsa and gasba runs,
+    caption = {Paramaters used for the gsa and gasba runs},
 	label = tab:params,
 	pos = h,
 ]{lcccccc}{}
 {
 \FL
-		   & Population (N) & Dimension (D) & \# Iterations & $g_0$ & $\alpha$ & $t_0$ \ML
+	Function	   & Population (N) & Dimension (D) & \# Iterations & $g_0$ & $\alpha$ & $t_0$ \ML
      $f_{gsa}$   & 50             & 30        & 1000          & 100   & 20       & -  \NN
-     $f_{gasba}$ & 50             & 2         & 1000          & 100   & 20       & 20 \LL
+     \addlinespace
+     $f_{i_{gasba}}$ & 50             & 2         & 50          & 100   & 20       & 20 \NN
+     $f_{3_{gasba}}$ & 50             & 2         & 100          & 100   & 20       & 20 \LL
 }
 %
 \ctable[
-	caption = All results,
+	caption = Numerical results found here compared to those in the GSA and GABSA papers,
 	label = tab:res,
 	pos = h,
-]{lcrc}{}
+]{lcllll}{}
 {
 \FL
- Function        & Annealing & final fitness                  & succesful search (\%)\ML
- $f_{1_{gsa}}$   & no        & $[5.7 \pm 7.9] \cdot 10^{-19}$ & 100 \NN
-                 & yes       & $[6.6 \pm 7.8] \cdot 10^{-19}$ & 100 \NN
- \addlinespace
- $f_{2_{gsa}}$   & no        & $[2.8 \pm 1.5] \cdot 10^{+01}$ & 100 \NN
-                 & yes       & $[8.5 \pm 3.0] \cdot 10^{+01}$ & 100 \NN
- \addlinespace
- $f_{3_{gabsa}}$ & no        & $[8.5 \pm 5.5] \cdot 10^{-02}$ & 42  \NN
-                 & yes       & $[2.4 \pm 1.2] \cdot 10^{-01}$ & 69  \NN
+Function        & Annealing & \multicolumn{2}{c}{Average best so far} & \multicolumn{2}{c}{Optimal Solution}\ML
+                &     & Here                           & Paper\cite{GSA}      & Here                 & Paper\cite{GABSA}    \ML
+$f_{1_{gsa}}$   & no  & $[5.7 \pm 7.9] \cdot 10^{-19}$ & $7.3 \cdot 10^{-11}$ & $2.0 \cdot 10^{-20}$ & -                    \NN
+                & yes & $[6.6 \pm 7.8] \cdot 10^{-19}$ & -                    & $5.4 \cdot 10^{-20}$ & -                    \NN
 \addlinespace
- $f_{1_{gabsa}}$ & yes       & $[1.9 \pm 9.7] \cdot 10^{-47}$ & 100 \NN
- $f_{2_{gabsa}}$ & yes       & $[2.1 \pm 19] \cdot 10^{-01}$  & 100 \LL
+$f_{2_{gsa}}$   & no  & $[2.8 \pm 1.5] \cdot 10^{+01}$ & $4.0 \cdot 10^{-5}$  & $6.4 $               & -                    \NN
+                & yes & $[8.5 \pm 3.0] \cdot 10^{+01}$ & -                    & $28  $               & -                    \NN
+\addlinespace
+$f_{3_{gabsa}}$ & no  & $[2.8 \pm 2.7] \cdot 10^{-02}$ & -                    & $5.6 \cdot 10^{-17}$ & -                    \NN
+                & yes & $[1.8 \pm 1.0] \cdot 10^{-01}$ & -                    & $5.6 \cdot 10^{-17}$ & $2.6 \cdot 10^{-6}$  \NN
+\addlinespace
+$f_{1_{gabsa}}$ & yes & $[3.9 \pm 5.9] \cdot 10^{-2}$  & -                    & $1.9 \cdot 10^{-7}$  & $1.6 \cdot 10^{-6}$  \NN
+$f_{2_{gabsa}}$ & yes & $[2.5 \pm 1.4] \cdot 10^{3}$   & -                    & $1.7 \cdot 10^{-2}$  & $1.2 \cdot 10^{-4}$  \LL
 }
-% 5.7E-19 +- 7.9E-19, n: 100 gsa/f1_gsa", 
-% 2.8E+01 +- 1.5E+01, n: 100 gsa/f2_gsa", 
-% 8.5E-02 +- 5.5E-02, n: 42  gsa/f3_gabsa"
-% 1.9E-47 +- 9.7E-47, n: 100 gabsa/f1_gabs             
-% 2.1E-01 +- 1.9E+00, n: 100 gabsa/f2_gabs
-% 2.4E-01 +- 1.2E-01, n: 69  gabsa/f3_gabs
-% 6.6E-19 +- 7.8E-19, n: 100 gabsa/f1_gsa"
-% 8.5E+01 +- 3.0E+01, n: 100 gabsa/f2_gsa"            
+%5.7E-19 +- 7.9E-19, best: 2.0E-20  gsa/f1_gsa",
+%6.6E-19 +- 7.8E-19, best: 5.4E-20  gabsa/f1_gsa"
+ 
+%2.8E+01 +- 1.5E+01, best: 6.4E+00  gsa/f2_gsa", 
+%8.5E+01 +- 3.0E+01, best: 2.8E+01  gabsa/f2_gsa"
+ 
+%2.8E-02 +- 2.7E-02, best: 5.6E-17  gsa/f3_gabsa"
+%1.8E-01 +- 1.0E-01, best: 5.6E-17  gabsa/f3_gabs
+ 
+%3.9E-02 +- 5.9E-02, best: 1.9E-07  gabsa/f1_gabs
+%2.5E+02 +- 1.4E+03, best: 1.7E-02  gabsa/f2_gabs
 %
 \subsection{The GSA implementation}
 In \cref{fig:f1gsa,fig:f2gsa} we see the comparision between my implementation and that of the GSA paper. Then in 
