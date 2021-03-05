@@ -1,10 +1,103 @@
-Here I will present my GSA implementation compared to the original GSA\cite{GSA} paper for the test functions $f_{1}$ and $f_{2}$ presented in that paper. Then I will compare my GABSA implementation to its paper\cite{GABSA} for the functions $f_{1}$, $f_{2}$ and $f_{3}$ presented there. And finally I will show my GSA and GABSA implementation compared for $f_{1_{gsa}}$, $f_{2_{gsa}}$ and $f_{_{3_{gabsa}}}$.
+Here I will present my GSA implementation compared to the original GSA\cite{GSA} paper for the test functions $f_{1_{gsa}}$ and $f_{2_{gsa}}$ presented in that paper. Then I will compare my GABSA implementation to its paper\cite{GABSA} for the functions $f_{1_{gasba}}$, $f_{2_{gabsa}}$ and $f_{3_{gabsa}}$ presented there. And finally I will show my GSA and GABSA implementation compared for $f_{1_{gsa}}$, $f_{2_{gsa}}$ and $f_{_{3_{gabsa}}}$. 
+The suffix to a function $f_{i_\text{suffix}}$ refers to the paper not the method used. In practise the only difference for $f_1$ and $f_2$ is the dimensionallity. See \cref{tab:functions} for the definition of these functions and \cref{tab:params} for the paramaters used. For each function 100 searches where performed.
+%
+\ctable[
+	caption = Test functions used,
+	label = tab:functions,
+	pos = h,
+]{llcc}{}
+{
+\FL
+			 & Function & Range & Optimal value \ML
+$f_{1_{gsa}}$& $\sum_{i=1}^d x^2_i$    & $[-100,100]^d$  & $[0,0]^d = 0$ \NN
+$f_{2_{gsa}}$& $\sum_{i=1}^d |x_i| + \Pi^d_{i=1} |x_i|$    & $[-10,10]^d$  & $[0,0]^n = 0$ \NN
+$f_{3_{gabsa}}$& $0.5+\frac{\text{sin}^2{\sqrt{x_1^2+x_2^2}}-0.5}{\left[1+0.001\left(x_1^2+x_2^2\right)\right]^2}$    & $(-100,100)$  & $(0,0) = 0$ \LL
+}
 
-\begin{figure}
-	\centering
-	\subcaptionbox{This GSA implementation}
-		[.49\linewidth]{\includegraphics{f1}}
-	\subcaptionbox{The original GSA implementation}
-		[.49\linewidth]{\includegraphics{f1}}
-	\caption{Problem $f_1$ from the GSA paper\cite{GSA} compared}
-\end{figure}
+\ctable[
+	caption = Paramaters used for the gsa and gasba runs,
+	label = tab:params,
+	pos = h,
+]{lcccccc}{}
+{
+\FL
+		   & Population (N) & Dimension (D) & \# Iterations & $g_0$ & $\alpha$ & $t_0$ \ML
+     $f_{gsa}$   & 50             & 30        & 1000          & 100   & 20       & -  \NN
+     $f_{gasba}$ & 50             & 2         & 1000          & 100   & 20       & 20 \LL
+}
+%
+\ctable[
+	caption = All results,
+	label = tab:res,
+	pos = h,
+]{lcrc}{}
+{
+\FL
+ Function        & Annealing & final fitness                  & succesful search (\%)\ML
+ $f_{1_{gsa}}$   & no        & $[5.7 \pm 7.9] \cdot 10^{-19}$ & 100 \NN
+                 & yes       & $[6.6 \pm 7.8] \cdot 10^{-19}$ & 100 \NN
+ \addlinespace
+ $f_{2_{gsa}}$   & no        & $[2.8 \pm 1.5] \cdot 10^{+01}$ & 100 \NN
+                 & yes       & $[8.5 \pm 3.0] \cdot 10^{+01}$ & 100 \NN
+ \addlinespace
+ $f_{3_{gabsa}}$ & no        & $[8.5 \pm 5.5] \cdot 10^{-02}$ & 42  \NN
+                 & yes       & $[2.4 \pm 1.2] \cdot 10^{-01}$ & 69  \NN
+\addlinespace
+ $f_{1_{gabsa}}$ & yes       & $[1.9 \pm 9.7] \cdot 10^{-47}$ & 100 \NN
+ $f_{2_{gabsa}}$ & yes       & $[2.1 \pm 19] \cdot 10^{-01}$  & 100 \LL
+}
+% 5.7E-19 +- 7.9E-19, n: 100 gsa/f1_gsa", 
+% 2.8E+01 +- 1.5E+01, n: 100 gsa/f2_gsa", 
+% 8.5E-02 +- 5.5E-02, n: 42  gsa/f3_gabsa"
+% 1.9E-47 +- 9.7E-47, n: 100 gabsa/f1_gabs             
+% 2.1E-01 +- 1.9E+00, n: 100 gabsa/f2_gabs
+% 2.4E-01 +- 1.2E-01, n: 69  gabsa/f3_gabs
+% 6.6E-19 +- 7.8E-19, n: 100 gabsa/f1_gsa"
+% 8.5E+01 +- 3.0E+01, n: 100 gabsa/f2_gsa"            
+%
+\subsection{The GSA implementation}
+In \cref{fig:f1gsa,fig:f2gsa} we see the comparision between my implementation and that of the GSA paper. Then in 
+%
+\subsection{The GABSA implementation}
+%
+\subsection{GSA vs GABSA}
+%
+% \begin{figure}
+% 	\centering
+% 	\subcaptionbox{This GSA implementation}
+% 		[.49\linewidth]{\includegraphics{f1}}
+% 	\subcaptionbox{The original GSA implementation}
+% 		[.49\linewidth]{\includegraphics{f1}}
+% 	\caption{Problem $f_1$ from the GSA paper\cite{GSA} compared}
+%     \label{fig:f1gabsa}
+% \end{figure}
+
+% \begin{figure}
+% 	\centering
+% 	\subcaptionbox{This GSA implementation}
+% 		[.49\linewidth]{\includegraphics{f1}}
+% 	\subcaptionbox{The original GSA implementation}
+% 		[.49\linewidth]{\includegraphics{f1}}
+% 	\caption{Problem $f_1$ from the GSA paper\cite{GSA} compared}
+%     \label{fig:f2gabsa}
+% \end{figure}
+
+% \begin{figure}
+% 	\centering
+% 	\subcaptionbox{This GSA implementation}
+% 		[.49\linewidth]{\includegraphics{f1}}
+% 	\subcaptionbox{The original GSA implementation}
+% 		[.49\linewidth]{\includegraphics{f1}}
+% 	\caption{Problem $f_1$ from the GSA paper\cite{GSA} compared}
+%     \label{fig:f1gabsa}
+% \end{figure}
+
+% \begin{figure}
+% 	\centering
+% 	\subcaptionbox{This GSA implementation}
+% 		[.49\linewidth]{\includegraphics{f1}}
+% 	\subcaptionbox{The original GSA implementation}
+% 		[.49\linewidth]{\includegraphics{f1}}
+% 	\caption{Problem $f_1$ from the GSA paper\cite{GSA} compared}
+%     \label{fig:f2gabsa}
+% \end{figure}
