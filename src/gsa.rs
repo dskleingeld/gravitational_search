@@ -21,10 +21,19 @@ mod gsa_paper {
             c100 * (x[1] - x[0].powi(2)).powi(2) + (x[0] - T::one()).powi(2) 
         }).sum()
     }
+    /// GSASA function F3, does not appear in GSA paper
+    pub fn f3<T: Number>(x: &[T]) -> T {
+        let half = T::from_f64(0.5f64).unwrap();
+        let small = T::from_f64(0.001f64).unwrap();
+        let sqrt = (x[0].powi(2) + x[1].powi(2)).sqrt(); //sqrt(x^2+y^2)
+        let upper = sqrt.sin().powi(2) - half; //sin^2(sqrt(x^2+y^2)) -0.5
+        let lower = T::one() + small * (x[0].powi(2)+x[1].powi(2));
+        let lower = lower.powi(2);
+        half + upper.div(lower)
+    }
 }
 
 fn main() {
-    const SEED: u64 = 0;
     const POPULATION: usize = 50; // check
     const DIMENSION: usize = 30; // check
 
@@ -44,7 +53,7 @@ fn main() {
                 .seed(seed);
         let _res = gsa.search_w_stats(r64(-100.)..=r64(100.), POPULATION, &mut stats);
         stats.best_to_file(&mut file);
-    }
+    };
 
     let mut file = File::create("data/gsa/f2_gsa.stats").unwrap();
     for seed in 0..100 {
@@ -52,7 +61,18 @@ fn main() {
         let mut gsa: GSA<R64, _, Minimize, _, DIMENSION> =
             GSA::new(g0, alpha, max_n, gsa_paper::f2, stop)
                 .seed(seed);
-        let res = gsa.search_w_stats(r64(-30.)..=r64(30.), POPULATION, &mut stats);
+        let _res = gsa.search_w_stats(r64(-30.)..=r64(30.), POPULATION, &mut stats);
+        stats.best_to_file(&mut file);
+    }
+
+    let stop_100 = |n: usize, _| n > 100;
+    let mut file = File::create("data/gsa/f3_gabsa.stats").unwrap();
+    for seed in 0..100 {
+        let mut stats = TrackFitness::default();
+        let mut gsa: GSA<R64, _, Minimize, _, DIMENSION> =
+            GSA::new(g0, alpha, 100, gsa_paper::f3, stop_100)
+                .seed(seed);
+        let _res = gsa.search_w_stats(r64(-30.)..=r64(30.), POPULATION, &mut stats);
         stats.best_to_file(&mut file);
     }
 }

@@ -34,23 +34,23 @@ mod gsa_paper {
 }
 
 fn main() {
-    const SEED: u64 = 0;
     const POPULATION: usize = 50; // check
     const DIMENSION: usize = 30; // check
 
     let g0 = r64(100.); // check
     let alpha = r64(20.); // check
     let t0 = r64(20.);
-    // let kb = r64() //check
-    let max_n = 1_000; // check
+    let max_n = 1000;
 
-    let stop = |n: usize, _| n > max_n;
+    let stop = |n: usize, _| n > 1000;
+    let stop_100 = |n: usize, _| n > 100;
+    let stop_50 = |n: usize, _| n > 50;
 
     let mut file = File::create("data/gabsa/f1_gabsa.stats").unwrap();
     for seed in 0..100 {
         let mut stats = TrackFitness::default();
         let mut gsa: GSA<R64, _, Minimize, _, 2> =
-            GSA::new(g0, alpha, max_n, gsa_paper::f1, stop)
+            GSA::new(g0, alpha, 50, gsa_paper::f1, stop_50)
                 .with_annealing(t0)
                 .seed(seed);
         let _res = gsa.search_w_stats(r64(-5.)..=r64(5.), POPULATION, &mut stats);
@@ -61,7 +61,8 @@ fn main() {
     for seed in 0..100 {
         let mut stats = TrackFitness::default();
         let mut gsa: GSA<R64, _, Minimize, _, 2> =
-            GSA::new(g0, alpha, max_n, gsa_paper::f2, stop)
+            GSA::new(g0, alpha, 50, gsa_paper::f2, stop_50)
+                .with_annealing(t0)
                 .seed(seed);
         let _res = gsa.search_w_stats(r64(-100.)..=r64(100.), POPULATION, &mut stats);
         stats.best_to_file(&mut file);
@@ -71,7 +72,7 @@ fn main() {
     for seed in 0..100 {
         let mut stats = TrackFitness::default();
         let mut gsa: GSA<R64, _, Minimize, _, 2> =
-            GSA::new(g0, alpha, max_n, gsa_paper::f3, stop)
+            GSA::new(g0, alpha, 100, gsa_paper::f3, stop_100)
                 .with_annealing(t0)
                 .seed(seed);
         let _res = gsa.search_w_stats(r64(-100.)..=r64(100.), POPULATION, &mut stats);
@@ -85,7 +86,7 @@ fn main() {
             GSA::new(g0, alpha, max_n, gsa_paper::f1, stop)
                 .with_annealing(t0)
                 .seed(seed);
-        let res = gsa.search_w_stats(r64(-100.)..=r64(100.), POPULATION, &mut stats);
+        let _res = gsa.search_w_stats(r64(-100.)..=r64(100.), POPULATION, &mut stats);
         stats.best_to_file(&mut file);
     }
     
@@ -96,7 +97,7 @@ fn main() {
             GSA::new(g0, alpha, max_n, gsa_paper::f2, stop)
                 .with_annealing(t0)
                 .seed(seed);
-        let res = gsa.search_w_stats(r64(-100.)..=r64(100.), POPULATION, &mut stats);
+        let _res = gsa.search_w_stats(r64(-100.)..=r64(100.), POPULATION, &mut stats);
         stats.best_to_file(&mut file);
     }
 }
