@@ -74,7 +74,7 @@ def plot_insert(ax, data, mean, xlim, ylim):
     # plt.yticks(visible=False)
     mark_inset(ax,axins, loc1=2, loc2=3, fc="none", ec="0.5")
 
-plot("gsa/f1_gsa", log=True, ylim=(1e5,1e-15), insert=((0,28),(700,80e3)))
+plot("gsa/f1_gsa", log=True, ylim=(1e-15,1e5), insert=((0,28),(700,80e3)))
 plot("gabsa/f1_gsa", log=True)
 print()
 plot("gsa/f2_gsa", log=True, xlim=(0,300), ylim=(10,1e7))
