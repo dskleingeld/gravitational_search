@@ -17,6 +17,7 @@
 % \usepackage[toc,page]{appendix} %appendices with sections
 \usepackage{amsmath}  % extended mathematics
 \usepackage{booktabs} % book-quality tables
+\usepackage[smaller,nolist,nohyperlinks]{acronym}
 % \usepackage{units}    % non-stacked fractions and better unit spacing
 % \usepackage{multicol} % multiple column layout facilities
 % \usepackage{lipsum}   % filler text
@@ -36,6 +37,11 @@
 \maketitle
 \tableofcontents
 %\end{titlepage}
+
+\begin{acronym}
+\acro{gsa}[GSA]{Gravitational Search Algorithm}
+\acro{gabsa}[gabsa]{Gravitational Algorithm Based Simulated Annealing}
+\end{acronym}
 
 \section{Introduction}
 \input{content/intro}
