@@ -1,19 +1,19 @@
-For GSA \cref{eq:G} is used to calculate $G$ at each timestep. With $g_0$ and $\alpha$ paramaters of the search and $N$ the total number of search iterations.
+For \ac{gsa} \cref{eq:G} is used to calculate $G$ at each timestep. With $g_0$ and $\alpha$ paramaters of the search and $N$ the total number of search iterations.
 %
 \begin{align} \label{eq:G}
 	G_i = g_0 \cdot e^{- \alpha * i/N}
 \end{align}
 %
-As cooling function for GABSA we used simple linear cooling starting at at temperature $t0$ as in \cref{eq:cooling}. Here $P$ is the number of particles, $N$ the number of search steps and $i$ the current step, starting at $1$.
+As cooling function for \ac{gabsa} we used simple linear cooling starting at at temperature $t0$ as in \cref{eq:cooling}. Here $P$ is the number of particles, $N$ the number of search steps and $i$ the current step, starting at $1$.
 %
 \begin{align} \label{eq:cooling}
 	T_i = P - \frac{P}{i/N} + 1
 \end{align}
 %
 \subsection{Code}
-I chose to write the implementation of GSA from scratch in \textit{Rust}\footnote{https://en.wikipedia.org/wiki/Rust\_(programming\_language)}. Rust was chosen as I am interested in seeing how suitable Rust is for such work, additionally the performance is welcome during testing. The result is a GSA object keeping track of the problem and search parameters and optional methods to set a seed for the random generator, chose weather to use annealing (GABSA) and finally to search with or without gathering statistics.
+I chose to write the implementation of \ac{gsa} from scratch in \textit{Rust}\footnote{https://en.wikipedia.org/wiki/Rust\_(programming\_language)}. Rust was chosen as I am interested in seeing how suitable Rust is for such work, additionally the performance is welcome during testing. The result is a \ac{gsa} object keeping track of the problem and search parameters and optional methods to set a seed for the random generator, chose weather to use annealing (\ac{gabsa} ) and finally to search with or without gathering statistics.
 
-To create a GSA object we need:
+To create a \ac{gsa} object we need:
 %
 \begin{enumerate}
 \item $g_0$ and $\alpha$

@@ -1,4 +1,4 @@
-Here I will present my GSA implementation compared to test functions from both papers: $f_{1_{gsa}}$ and $f_{2_{gsa}}$ from the GSA paper and by $f_{1_{gasba}}$ $f_{2_{gabsa}}$ and $f_{3_{gabsa}}$ from the GABSA paper. Finally I will show my GSA and GABSA implementation compared for $f_{1_{gsa}}$, $f_{2_{gsa}}$ and $f_{_{3_{gabsa}}}$\footnote{The suffix to a function $f_{i_\text{suffix}}$ refers to the paper not the method used}.
+Here I will present my \ac{gsa} implementation compared to test functions from both papers: $f_{1_{gsa}}$ and $f_{2_{gsa}}$ from the \ac{gsa} paper and by $f_{1_{gasba}}$ $f_{2_{gabsa}}$ and $f_{3_{gabsa}}$ from the \ac{gabsa} paper. Finally I will show my \ac{gsa} and \ac{gabsa} implementation compared for $f_{1_{gsa}}$, $f_{2_{gsa}}$ and $f_{_{3_{gabsa}}}$\footnote{The suffix to a function $f_{i_\text{suffix}}$ refers to the paper not the method used}.
 
 In practise the only difference for $f_1$ and $f_2$ is the dimensionallity. See \cref{tab:functions} for the definition of these functions and \cref{tab:params} for the paramaters used. For each function 100 searches where performed.
 %
@@ -30,7 +30,7 @@ $f_{3_{gabsa}}$& $0.5+\frac{\text{sin}^2{\sqrt{x_1^2+x_2^2}}-0.5}{\left[1+0.001\
 }
 %
 \ctable[
-	caption = Numerical results found here compared to those in the GSA and GABSA papers,
+	caption = Numerical results found here compared to those in the \ac{gsa} and \ac{gabsa} papers,
 	label = tab:res,
 	pos = h,
 ]{lcllll}{}
@@ -63,50 +63,50 @@ $f_{2_{gabsa}}$ & yes & $[2.5 \pm 1.4] \cdot 10^{3}$   & -                    & 
 %2.5E+02 +- 1.4E+03, best: 1.7E-02  gabsa/f2_gabs
 %
 \subsubsection*{The GSA implementation}
-In \cref{fig:f1} we see the comparision between my implementation and that of the GSA paper. Note the slight hump at the start enlarged in the top right and the steeper decent.
+In \cref{fig:f1} we see the comparision between my implementation and that of the \ac{gsa} paper. Note the slight hump at the start enlarged in the top right and the steeper decent.
 %
 \begin{figure}
 	\centering
 	\subcaptionbox{My implementation, in blue 100 individual runs in red the average of these runs}
 		[.49\linewidth]{\includegraphics{gsa/f1_gsa}}
-	\subcaptionbox{Implementation in GSA paper, in black the performance of GSA}
+	\subcaptionbox{Implementation in \ac{gsa} paper, in black the performance of \ac{gsa}}
 		[.49\linewidth]{\includegraphics{gsa_paper/f1}}
 	\caption{Average best-so-far fitness for function $f_{1_{gsa}}$ compared.}
     \label{fig:f1}
 \end{figure}
 %
 \subsubsection*{The GABSA implementation}
-In \cref{fig:f1gabsa,fig:f3gabsa} the comperision between my implementation and that in the GABSA paper. Note in \cref{fig:myf1} again the bump at the start and the conversion to discrete values. In \cref{fig:myf2} we see only one out of a hundred runs that follows the \textit{Optional solution} figure for $f_{2_{gabsa}}$ from \cref{tab:res}. The plots from the GABSA paper (\cref{fig:bad1,fig:bad2}) are not usable for comparison as they have a linear axis and little detail visible.
+In \cref{fig:f1gabsa,fig:f3gabsa} the comperision between my implementation and that in the \ac{gabsa} paper. Note in \cref{fig:myf1} again the bump at the start and the conversion to discrete values. In \cref{fig:myf2} we see only one out of a hundred runs that follows the \textit{Optional solution} figure for $f_{2_{gabsa}}$ from \cref{tab:res}. The plots from the \ac{gabsa} paper (\cref{fig:bad1,fig:bad2}) are not usable for comparison as they have a linear axis and little detail visible.
 %
 \begin{figure}
 	\centering
-	\subcaptionbox{My GABSA implementation \label{fig:myf1}}
+	\subcaptionbox{My \ac{gabsa} implementation \label{fig:myf1}}
 		[.49\linewidth]{\includegraphics{gabsa/f1_gabsa}}
-	\subcaptionbox{The original GABSA implementation \label{fig:bad1}}
+	\subcaptionbox{The original \ac{gabsa} implementation \label{fig:bad1}}
 		[.49\linewidth]{\includegraphics{gabsa_paper/f1}}
-	\caption{Problem $f_{2_{gbsa}}$ from the GABSA paper\cite{GBSA} compared}
+	\caption{Problem $f_{2_{gbsa}}$ from the \ac{gabsa} paper\cite{GBSA} compared}
     \label{fig:f1gabsa}
 \end{figure}
 %
 \begin{figure}
 	\centering
-	\subcaptionbox{My GABSA implementation}
+	\subcaptionbox{My \ac{gabsa} implementation}
 		[.49\linewidth]{\includegraphics{gabsa/f3_gabsa}}
-	\subcaptionbox{The original GABSA implementation \label{fig:bad2}}
+	\subcaptionbox{The original \ac{gabsa} implementation \label{fig:bad2}}
 		[.49\linewidth]{\includegraphics{gabsa_paper/f3}}
-	\caption{Problem $f_{3_{gbsa}}$ from the GABSA paper\cite{GBSA} compared}
+	\caption{Problem $f_{3_{gbsa}}$ from the \ac{gabsa} paper\cite{GBSA} compared}
     \label{fig:f3gabsa}
 \end{figure}
 %
 \subsubsection*{GSA vs GABSA}
-A full comparison between GSA with and without annealing is out of the scope of this report. In \cref{fig:f2comp} we compare my implementation of GSA and GABSA.
+A full comparison between \ac{gsa} with and without annealing is out of the scope of this report. In \cref{fig:f2comp} we compare my implementation of \ac{gsa} and \ac{gabsa}.
 %
 \begin{figure}
 	\centering
-	\subcaptionbox{GSA}
+	\subcaptionbox{\ac{gsa}}
 		[.49\linewidth]{\includegraphics{gsa/f2_gsa}}
 	\subcaptionbox{GABSA}
 		[.49\linewidth]{\includegraphics{gabsa/f2_gsa}}
-	\caption{Problem $f_{2_{gsa}}$ from the GSA paper\cite{GSA} using my GSA and GABSA implementation}
+	\caption{Problem $f_{2_{gsa}}$ from the \ac{gsa} paper\cite{GSA} using my \ac{gsa} and \ac{gabsa} implementation}
     \label{fig:f2comp}
 \end{figure}
