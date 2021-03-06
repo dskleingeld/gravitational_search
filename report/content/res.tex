@@ -62,49 +62,51 @@ $f_{2_{gabsa}}$ & yes & $[2.5 \pm 1.4] \cdot 10^{3}$   & -                    & 
 %3.9E-02 +- 5.9E-02, best: 1.9E-07  gabsa/f1_gabs
 %2.5E+02 +- 1.4E+03, best: 1.7E-02  gabsa/f2_gabs
 %
-\subsection{The GSA implementation}
-In \cref{fig:f1gsa,fig:f2gsa} we see the comparision between my implementation and that of the GSA paper. Then in 
+\subsubsection*{The GSA implementation}
+In \cref{fig:f1} we see the comparision between my implementation and that of the GSA paper. Note the slight hump at the start enlarged in the top right and the steeper decent.
 %
-\subsection{The GABSA implementation}
+\begin{figure}
+	\centering
+	\subcaptionbox{My implementation, in blue 100 individual runs in red the average of these runs}
+		[.49\linewidth]{\includegraphics{gsa/f1_gsa}}
+	\subcaptionbox{Implementation in GSA paper, in black the performance of GSA}
+		[.49\linewidth]{\includegraphics{gsa_paper/f1}}
+	\caption{Average best-so-far fitness for function $f_{1_{gsa}}$ compared.}
+    \label{fig:f1}
+\end{figure}
 %
-\subsection{GSA vs GABSA}
+\subsubsection*{The GABSA implementation}
+In \cref{fig:f1gabsa,fig:f3gabsa} the comperision between my implementation and that in the GABSA paper. Note in \cref{fig:myf1} again the bump at the start and the conversion to discrete values. In \cref{fig:myf2} we see only one out of a hundred runs that follows the \textit{Optional solution} figure for $f_{2_{gabsa}}$ from \cref{tab:res}. The plots from the GABSA paper (\cref{fig:bad1,fig:bad2}) are not usable for comparison as they have a linear axis and little detail visible.
 %
-% \begin{figure}
-% 	\centering
-% 	\subcaptionbox{This GSA implementation}
-% 		[.49\linewidth]{\includegraphics{f1}}
-% 	\subcaptionbox{The original GSA implementation}
-% 		[.49\linewidth]{\includegraphics{f1}}
-% 	\caption{Problem $f_1$ from the GSA paper\cite{GSA} compared}
-%     \label{fig:f1gabsa}
-% \end{figure}
-
-% \begin{figure}
-% 	\centering
-% 	\subcaptionbox{This GSA implementation}
-% 		[.49\linewidth]{\includegraphics{f1}}
-% 	\subcaptionbox{The original GSA implementation}
-% 		[.49\linewidth]{\includegraphics{f1}}
-% 	\caption{Problem $f_1$ from the GSA paper\cite{GSA} compared}
-%     \label{fig:f2gabsa}
-% \end{figure}
-
-% \begin{figure}
-% 	\centering
-% 	\subcaptionbox{This GSA implementation}
-% 		[.49\linewidth]{\includegraphics{f1}}
-% 	\subcaptionbox{The original GSA implementation}
-% 		[.49\linewidth]{\includegraphics{f1}}
-% 	\caption{Problem $f_1$ from the GSA paper\cite{GSA} compared}
-%     \label{fig:f1gabsa}
-% \end{figure}
-
-% \begin{figure}
-% 	\centering
-% 	\subcaptionbox{This GSA implementation}
-% 		[.49\linewidth]{\includegraphics{f1}}
-% 	\subcaptionbox{The original GSA implementation}
-% 		[.49\linewidth]{\includegraphics{f1}}
-% 	\caption{Problem $f_1$ from the GSA paper\cite{GSA} compared}
-%     \label{fig:f2gabsa}
-% \end{figure}
+\begin{figure}
+	\centering
+	\subcaptionbox{My GABSA implementation \label{fig:myf1}}
+		[.49\linewidth]{\includegraphics{gabsa/f1_gabsa}}
+	\subcaptionbox{The original GABSA implementation \label{fig:bad1}}
+		[.49\linewidth]{\includegraphics{gabsa_paper/f1}}
+	\caption{Problem $f_{2_{gbsa}}$ from the GABSA paper\cite{GBSA} compared}
+    \label{fig:f1gabsa}
+\end{figure}
+%
+\begin{figure}
+	\centering
+	\subcaptionbox{My GABSA implementation}
+		[.49\linewidth]{\includegraphics{gabsa/f3_gabsa}}
+	\subcaptionbox{The original GABSA implementation \label{fig:bad2}}
+		[.49\linewidth]{\includegraphics{gabsa_paper/f3}}
+	\caption{Problem $f_{3_{gbsa}}$ from the GABSA paper\cite{GBSA} compared}
+    \label{fig:f3gabsa}
+\end{figure}
+%
+\subsubsection*{GSA vs GABSA}
+A full comparison between GSA with and without annealing is out of the scope of this report. In \cref{fig:f2comp} we compare my implementation of GSA and GABSA.
+%
+\begin{figure}
+	\centering
+	\subcaptionbox{GSA}
+		[.49\linewidth]{\includegraphics{gsa/f2_gsa}}
+	\subcaptionbox{GABSA}
+		[.49\linewidth]{\includegraphics{gabsa/f2_gsa}}
+	\caption{Problem $f_{2_{gsa}}$ from the GSA paper\cite{GSA} using my GSA and GABSA implementation}
+    \label{fig:f2comp}
+\end{figure}

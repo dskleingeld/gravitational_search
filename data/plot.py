@@ -36,30 +36,49 @@ def analyse(path: str):
     return (best_so_far, mean, std, n, best)
 
 
-def plot(name: str, log:bool =False, ylim=None, xlim=None):
+def plot(name: str, log:bool =False, ylim=None, xlim=None, insert=None):
     (best_so_far, mean, std, n, best) = analyse(name+".stats")
     print(f"{mean[-1]:.1E} +- {std[-1]:.1E}, best: {best:.1E}, n: {n}")
 
+    fig, ax = plt.subplots(figsize=(6.4,5.2))
     for line in best_so_far:
-        plt.plot(line, color="blue", alpha=0.15, linewidth=0.5)
-    plt.plot(mean, color="red", linewidth=2)
+        ax.plot(line, color="blue", alpha=0.15, linewidth=0.5)
+    ax.plot(mean, color="red", linewidth=2)
     plt.xlabel("iteration")
-    plt.ylabel("function result")
+    plt.ylabel("Average best-so-far")
     if log:
         plt.yscale("log")
     if ylim is not None:
-        plt.ylim(bottom=1e-15)
+        plt.ylim(ylim[0], ylim[1])
     if xlim is not None:
         plt.xlim(xlim[0], xlim[1])
-    plt.tight_layout(pad=1)
-    plt.savefig("../plots/"+name)
+    if insert:
+        (xlim, ylim) = insert
+        plot_insert(ax, best_so_far, mean, xlim, ylim)
+    # plt.tight_layout(pad=1)
+    plt.savefig("../plots/"+name, dpi=300)
     plt.clf()
 
-plot("gsa/f1_gsa", log=True, ylim=1e-15)
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+from mpl_toolkits.axes_grid1.inset_locator import mark_inset
+def plot_insert(ax, data, mean, xlim, ylim):
+    axins = inset_axes(ax, width=2.3, height=2, loc=1) #zoom=6
+    for line in data:
+        axins.plot(line, color="blue", alpha=0.15, linewidth=0.5)
+    axins.plot(mean, color="red", linewidth=2)
+    axins.set_yscale("log")
+    axins.set_xlim(xlim)
+    axins.set_ylim(ylim)
+
+    # plt.xticks(visible=False)
+    # plt.yticks(visible=False)
+    mark_inset(ax,axins, loc1=2, loc2=3, fc="none", ec="0.5")
+
+plot("gsa/f1_gsa", log=True, ylim=(1e5,1e-15), insert=((0,28),(700,80e3)))
 plot("gabsa/f1_gsa", log=True)
 print()
-plot("gsa/f2_gsa", log=True, xlim=(0,300))
-plot("gabsa/f2_gsa", log=True, xlim=(0,300))
+plot("gsa/f2_gsa", log=True, xlim=(0,300), ylim=(10,1e7))
+plot("gabsa/f2_gsa", log=True, xlim=(0,300), ylim=(10,1e7))
 print()
 plot("gsa/f3_gabsa", log=True)
 plot("gabsa/f3_gabsa", log=True)
