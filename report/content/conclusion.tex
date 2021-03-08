@@ -1,0 +1,11 @@
+Here I implemented both \ac{gsa} and \ac{gabsa} and attempted to replicate parts of both the \ac{gsa}\cite{GSA} and \ac{gabsa}\cite{GABSA} papers. Let us see what we can conclude from the results, starting with \ac{gsa}.
+
+In \cref{tab:res} there are two comparisons between my and the authors implementation of \ac{gsa}. Function $f_1$ optimized to a better value, the direct comparison of $f_1$ in \cref{fig:f1} shows that my implementation also converged faster. The hump at the start for my implementation is also not present in the authors work. Clearly my implementation can not be their \ac{gsa}. Looking at $f_2$ my work converges 6 orders of magnitude worse then it should. I conclude that I did not successfully replicate \ac{gsa}.
+
+As my \ac{gabsa} work is based on my \ac{gsa} implementation which we just concluded was faulty we expect it to perform weakly. However we see (\cref{tab:res}) that our results are better for 3 of the 2 problems tried. I can not compare the plots as they author\ac{gabsa} choose to use a linear scale\footnote{this hides almost every detail of the plot}. However it is clear that my work has a huge variance between runs. I do not know whether my \ac{gsa} work comes close to a correct \ac{gabsa} implementation.
+%
+The \ac{gabsa} paper\cite{GABSA} does not specify the cooling function used for annealing and its plots have little to no detail. Further more instead of reporting an average and variance the paper only mentions the best value reached in a run. The paper does not mention the number of runs used to reach this value.
+
+To conclude, neither \ac{gsa} and \ac{gabsa} where correctly replicated here, \ac{gabsa} can never be replicated exactly without access to the original data or source.
+
+Given the state of the \ac{gabsa} paper\cite{GABSA} it should be recreated and the results presented verified. Future work should include building \ac{gabsa} on top of a verified \ac{gsa} implementation then trying multiple cooling functions. Alternatively time could be spend fixing the \ac{gsa} implementation.
