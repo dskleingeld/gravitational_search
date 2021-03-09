@@ -2,9 +2,8 @@
 # from data dir use ls | entr -rc python3 plot.py to run on any source or data change
 
 from typing import Optional
-import os
+import pathlib
 import matplotlib.pyplot as plt;
-# import seaborn
 import numpy as np
 
 def analyse(path: str):
@@ -55,7 +54,7 @@ def plot(name: str, log:bool =False, ylim=None, xlim=None, insert=None):
     if insert:
         (xlim, ylim) = insert
         plot_insert(ax, best_so_far, mean, xlim, ylim)
-    # plt.tight_layout(pad=1)
+
     plt.savefig("../plots/"+name, dpi=300)
     plt.clf()
 
@@ -70,9 +69,10 @@ def plot_insert(ax, data, mean, xlim, ylim):
     axins.set_xlim(xlim)
     axins.set_ylim(ylim)
 
-    # plt.xticks(visible=False)
-    # plt.yticks(visible=False)
     mark_inset(ax,axins, loc1=2, loc2=3, fc="none", ec="0.5")
+
+pathlib.Path("../plots/gsa").mkdir(parents=True, exist_ok=True)
+pathlib.Path("../plots/gabsa").mkdir(parents=True, exist_ok=True)
 
 plot("gsa/f1_gsa", log=True, ylim=(1e-15,1e5), insert=((0,28),(700,80e3)))
 plot("gabsa/f1_gsa", log=True)
