@@ -1,18 +1,18 @@
-Here I will concise explanation of both search algorithms starting with \ac{gsa} as the other is a slight modification upon this. For a more detailed description refer to the \ac{gsa}\cite{GSA} and \ac{gabsa}\cite{GABSA} papers.
+Here I will give a concise explanation of both search algorithms starting with \ac{gsa} as the other is a slight modification upon this. For a more detailed description refer to the \ac{gsa}\cite{GSA} and \ac{gabsa}\cite{GABSA} papers.
 %
 \subsection{GSA} \label{sec:GSA}
-The interaction between the particles are governed by Newtons laws, given the mass (fitness\footnote{normalized between $0$ and $1$}) and position (parameters) of each particle (solution) we can derive how they move. Below the $m$ is the mass of our particle for whom we want to know its next position, $M_i$ and $R_i$ the mass and distance to one of the other particles, $G$ a constant in physics here it is a decreasing function, $\vec{a}$ how our particle will accelerate finally $k$ starts out as the total number of particles and liniarly descreasing to one during the seach.
+The interaction between the particles are governed by Newtons laws, given the mass (fitness\footnote{normalized between $0$ and $1$}) and position (parameters) of each particle (solution) we can derive how they move. In \cref{eq:grav} $m$ is the mass of our particle for whom we want to know its next position, $M_i$ and $R_i$ the mass and distance to one of the other particles, $G$\footnote{a constant in physics} a decreasing function, $\vec{a}$ how our particle will accelerate finally $k$ starts out as the total number of particles and linearly decreasing to one during the search.
 \ac{gsa} uses a modification of Newtons law of gravitation where $R^2$ is replaced with $R$.
 %
 \begin{subequations}
-\begin{align}
+\begin{align} \label{eq:grav}
 	\vec{F}&=m\vec{a} &            \vec{F}&=\sum_{i=0}^{i=k} \frac{GmM_i}{R_i} \\
 	m\vec{a} &= \sum_{i=0}^{i=k} \frac{GmM_i}{R_i} \\
 	\vec{a} &= \sum_{i=0}^{i=k} \frac{GM_i}{R_i}
 \end{align}
 \end{subequations}
 %
-Note $\vec{a}$ does not depend on $m$, without this result any solution with a fitness of zero would ruin the search turning all values into \texttt{Nan}. To find the paramaters at the next iteration of the search we update its velocity and then its position. The velocity change is randomized (this improves \ac{gsa} exploration).
+Note $\vec{a}$ does not depend on $m$, without this result any solution with a fitness of zero would ruin the search turning all values into \texttt{Nan}. To find the parameters for the next iteration of the search we update all particles velocities and then their positions using \cref{eq:paramater_update}. The amount the velocity change is randomized (this improves \ac{gsa} exploration), here $r$ is a random number between $0$ and $1$.
 %
 \begin{subequations}
 \begin{align} \label{eq:paramater_update}
@@ -21,10 +21,10 @@ Note $\vec{a}$ does not depend on $m$, without this result any solution with a f
 \end{align}
 \end{subequations}
 %
-When each particle ends up a the same location the search result converged and we can not search further as the particles will no longer accelerate.
+When each particle ends up at the same location the search result converged and we can not search further as the particles will no longer accelerate anywhere.
 %
 \subsection{GABSA}
-Adding annealing to the paramater update in \cref{eq:paramater_update} gives us \ac{gabsa}. To do so we add the condition below after \cref{eq:pos_update}
+Adding annealing to the parameter update in \cref{eq:paramater_update} gives us \ac{gabsa}. To do so we do the following after \cref{eq:pos_update}
 %
 \begin{subequations}[resume]
 \begin{align}
@@ -34,11 +34,11 @@ Adding annealing to the paramater update in \cref{eq:paramater_update} gives us 
 	\\
 	\vec{s}_{t_2} &= \left\{
 		\begin{array}{ll}
-			\vec{s}_{t_2} & \quad m_{t_2} > m_{t_1} \lor r \leq exp\\ 
+			\vec{s}_{t_2} & \quad m_{t_2} > m_{t_1} \lor r_a \leq exp\\ 
 			\vec{s}_{t_1} & \quad m_{t_2} \leq m_{t_1}
 		\end{array}
 	\right.
 \end{align}
 \end{subequations}
 %
-Here $T$, the temperature, is a decreasing \textit{cooling} function and $r$ a random number between 0 and 1. As the temperature decreases the chance lowers that we accept new parameters when they lead to a worse solution.
+Here $T$, the temperature, is a decreasing \textit{cooling} function and $r_a$ new random number between 0 and 1. As the temperature decreases the chance lowers that we accept new parameters when they lead to a worse solution.

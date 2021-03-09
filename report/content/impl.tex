@@ -4,12 +4,19 @@ For \ac{gsa} \cref{eq:G} is used to calculate $G$ at each timestep. With $g_0$ a
 	G_i = g_0 \cdot e^{- \alpha * i/N}
 \end{align}
 %
-As cooling function for \ac{gabsa} we used simple linear cooling starting at at temperature $t0$ as in \cref{eq:cooling}. Here $P$ is the number of particles, $N$ the number of search steps and $i$ the current step, starting at $1$.
+The number of particles that still attract other particles ($k$ in \cref{eq:grav}) drops as in \cref{eq:k}, Here $P$ is the number of particles, $N$ the number of search steps and $i$ the current step, starting at $1$.
 %
-\begin{align} \label{eq:cooling}
-	T_i = P - \frac{P}{i/N} + 1
+\begin{align} \label{eq:k}
+	k_i = P - \frac{P}{i/N} + 1
 \end{align}
 %
+As cooling function for \ac{gabsa} we used simple linear cooling starting at temperature $T_0$ and cooling to $0$ see \cref{eq:cooling}.
+
+\begin{align} \label{eq:cooling}
+	t_i = T_0 \cdot \frac{N - i + 1}{N}
+\end{align}
+%
+
 \subsection{Code}
 I chose to write the implementation of \ac{gsa} from scratch in \textit{Rust}\footnote{https://en.wikipedia.org/wiki/Rust\_(programming\_language)}. Rust was chosen as I am interested in seeing how suitable Rust is for such work, additionally the performance is welcome during testing. The result is a \ac{gsa} object keeping track of the problem and search parameters and optional methods to set a seed for the random generator, chose weather to use annealing (\ac{gabsa} ) and finally to search with or without gathering statistics.
 

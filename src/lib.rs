@@ -241,8 +241,7 @@ where
     fn t(&self, t0: T) -> T { // TODO more interesting options: (geometric reduction, slow-decrease)
         let n: T = T::from_usize(self.n).unwrap();
         let max_n: T = T::from_usize(self.max_n).unwrap();
-        let alpha = T::from_f64(0.01).unwrap();
-        t0 - alpha 
+        t0*(max_n-n+T::one())/max_n
     }
     /// TODO currently only works for minimization
     fn update(f: &[T;D], old_agent: &Agent<T,D>, rng: &mut RandNumGen) -> Agent<T, D> {
