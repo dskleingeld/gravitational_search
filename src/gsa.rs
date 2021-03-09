@@ -45,6 +45,7 @@ fn main() {
 
     let stop = |n: usize, _| n > max_n;
     
+    std::fs::create_dir_all("data/gsa").unwrap();
     let mut file = File::create("data/gsa/f1_gsa.stats").unwrap();
     for seed in 0..100 {
         let mut stats = TrackFitness::default();
